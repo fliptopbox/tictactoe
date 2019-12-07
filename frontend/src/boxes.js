@@ -19,7 +19,6 @@ function boxes({scene}) {
         */
     };
 
-
     console.log(createWorld());
 
     var items = [1, 1, 1, 2, 2, 2, 3, 3, 3];
@@ -47,26 +46,23 @@ function boxes({scene}) {
     return cubes;
 }
 
+function createWorld(size = 0, origin = true) {
+    const sizes = [3, 5, 7, 9]; // small, medium, large, extra-large
+    const columns = sizes[size] || sizes[0];
+    const squared = columns ** 2; // number of cells per face
+    const cubed = columns ** 3; // total number of cells
+    const offset = origin ? (columns / 2) >> 0 : 0; // offset to origin
 
+    let world = [...Array(cubed)].map((_, i) => {
+        // setup coordinates
 
-    function createWorld(size = 0, origin = true) {
+        const x = (i % columns) - offset;
+        const y = (((i / columns) >> 0) % columns) - offset;
+        const z = (((i / squared) >> 0) % columns) - offset;
 
-        const sizes = [3, 5, 7, 9]; // small, medium, large, extra-large
-        const columns = sizes[size] || sizes[0];
-        const squared = columns ** 2; // number of cells per face
-        const cubed = columns ** 3; // total number of cells
-        const offset = origin ? (columns / 2) >> 0 : 0; // offset to origin
+        // console.log('V:%s  X:%s   Y:%s   Z:%s', i, x, y, z);
+        return {id: i, x, y, z};
+    });
 
-        let world = [...Array(cubed)].map((_, i) => {
-            // setup coordinates
-
-            const x = (i % columns) - offset;
-            const y = (((i / columns) >> 0) % columns) - offset;
-            const z = (((i / squared) >> 0) % columns) - offset;
-
-            // console.log('V:%s  X:%s   Y:%s   Z:%s', i, x, y, z);
-            return {id: i, x, y, z};
-        });
-
-        return world;
-    }
+    return world;
+}
