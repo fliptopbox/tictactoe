@@ -1,8 +1,8 @@
 import {MeshBuilder, Vector3} from 'babylonjs';
 import createWorld from'./createWorld';
 
-export default boxes;
-function boxes({scene}, diameter = 1) {
+export default getMatrix;
+function getMatrix({scene}, diameter = 1) {
     const {CreateBox} = MeshBuilder;
     const planet = createWorld(diameter).matrix.map(cube => {
 
