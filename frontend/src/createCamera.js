@@ -14,6 +14,7 @@ function createCamera({scene, canvas}, distance = 8) {
         scene
     );
 
+    camera.fov = 1.5;
     camera.setTarget(Vector3.Zero());
     camera.attachControl(canvas, true);
 }

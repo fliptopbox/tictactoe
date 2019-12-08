@@ -1,11 +1,12 @@
 import * as React from 'react';
-import { Vector3, MeshBuilder, Animation } from 'babylonjs';
+import { Color3, Vector3, MeshBuilder, Animation } from 'babylonjs';
 import Canvas from './Canvas'; // import the component above linking to file we just created.
 
 import createCamera from './createCamera';
 import createLight from './createLight';
 import getMatrix from './getMatrix';
 import showAxis from './showAxis';
+import rotatePlane from './rotatePlane';
 import { getTerrain } from './terrain';
 
 class Scene extends React.Component {
@@ -22,26 +23,23 @@ function generateScene(e) {
     const { scene, engine } = e;
     const diameter = 0;
 
+    scene.clearColor = new Color3(0.05, 0.05, 0.05);
+
     engine.runRenderLoop(() => scene && scene.render());
 
     // This creates and positions a free camera (non-mesh)
-    createCamera(e, ((diameter + 1) * 1.2) * 5);
-    createLight(e, 'hemi', 'sun', 0.8, [1, 4, 0]);
+    createCamera(e, (diameter + 1) * 3.6);
+    createLight(e, 'hemi', 'sun', 0.5, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5]);
     // createLight(e, 'point', 'point1', 0.8, [0, 6, -1]);
 
-    showAxis(3, scene);
+    showAxis((diameter + 1) * 3, scene);
     const earth = getMatrix(e, diameter);
-
 
     var CoR_At = new Vector3(0, 0, 0);
     var sphere = MeshBuilder.CreateSphere('sphere', { diameter: 0.25 }, scene);
     sphere.position = CoR_At;
 
-
-    earth
-        .filter(c => !c.core)
-        .forEach((cube, i) => getTerrain(cube, e, 0));
-
+    earth.filter(c => !c.core).forEach((cube, i) => getTerrain(cube, e, 0));
 
     // // TicTakToe tech-ton-nix  tec-ton-ics
 
@@ -57,6 +55,9 @@ function generateScene(e) {
     // sphere.animations.push(anim)
     //
 
+    window.rotate = function(axis, rotations = 1, z = 0) {
+        return rotatePlane(scene, earth, axis, rotations, z);
+    }
     window.earth = earth;
     window.turn = function(dim = 'x', n = 1) {
         let array = Array(9);

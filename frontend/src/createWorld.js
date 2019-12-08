@@ -21,7 +21,7 @@ function createWorld(diameter = 0) {
         z -= offset;
 
         const {axis, type} = setTerrain(offset, x, y, z);
-        console.log(axis, type);
+        // console.log(axis, type);
 
         const obj = {id: i, x, y, z, type, axis};
         return obj;
@@ -29,7 +29,7 @@ function createWorld(diameter = 0) {
 
     // output the count of interal objects
     // (the core of the planet)
-    console.log('core', Object.keys(matrix).filter(k => matrix[k].type).length);
+    // console.log('core', Object.keys(matrix).filter(k => matrix[k].type).length);
 
     return {
         matrix,
