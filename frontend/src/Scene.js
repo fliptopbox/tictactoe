@@ -20,7 +20,7 @@ export default Scene;
 
 function generateScene(e) {
     const { scene, engine } = e;
-    const diameter = 0;
+    const diameter = 1;
 
     scene.clearColor = new Color3(0.05, 0.05, 0.05);
 
@@ -33,11 +33,11 @@ function generateScene(e) {
     showAxis((diameter + 1) * 3, scene);
 
     const earth = getMatrix(e, diameter);
-    earth.filter(c => !c.core).forEach((cube, i) => getTerrain(cube, e, 0));
+    earth.filter(c => !c.core).forEach((cube) => getTerrain(cube, e, 0));
 
 
-    window.rotate = function(axis, rotations = 1, z = 0) {
-        return rotatePlane(scene, earth, axis, rotations, z);
+    window.rotate = function(axis, extent = 0, rotations = 1) {
+        return rotatePlane(scene, earth, axis, extent, rotations);
     }
     window.earth = earth;
 
