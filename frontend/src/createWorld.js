@@ -21,9 +21,9 @@ function createWorld(diameter = 0) {
         z -= offset;
 
         const {axis, type} = setTerrain(offset, x, y, z);
-        // console.log(axis, type);
+        const owner = 0;
 
-        const obj = {id: i, x, y, z, type, axis};
+        const obj = {id: i, x, y, z, type, axis, owner};
         return obj;
     });
 

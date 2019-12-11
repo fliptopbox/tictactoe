@@ -1,13 +1,14 @@
-import { Animation, Vector3, MeshBuilder, StandardMaterial } from 'babylonjs';
+import { VertexBuffer, VertexData, Animation, Vector3, MeshBuilder, StandardMaterial } from 'babylonjs';
+// import updateNormals from './updateNormals';
 
 export default rotatePlane;
 function rotatePlane(scene, matrix, axis = 'y', extent = 0, rotations = 1) {
-    if (!rotations || !/^[xy]$/.test(axis)) return;
+    if (!rotations || !/^[xyz]$/.test(axis)) return;
 
-    const speed = 0.46;
+    const speed = 0.36;
     const direction = rotations > 0 ? 1 : -1;
     const amount = [0.5, 1, 1.5, 2][(Math.abs(rotations) - 1) % 4];
-    const duration = 100 * amount * speed;
+    const duration = 75 * amount * speed;
     const pivot = createPivot(scene);
 
     let collection = matrix.filter(cube => {
@@ -30,7 +31,7 @@ function rotatePlane(scene, matrix, axis = 'y', extent = 0, rotations = 1) {
     ];
 
     const onAnimationEnd = () => {
-        collection = updateCubePositions(collection, matrix, pivot);
+        collection = updateCubePositions(collection, matrix, scene);
         pivot.dispose(true);
     };
 
@@ -50,7 +51,7 @@ function updateCubePositions(array, matrix) {
     // after the animation, update the mesh positions to absolute coords
     // and merge the new positions in the respective matrix reference
 
-    return array
+    const updated = array
         .map(cube => {
             const { absolutePosition } = cube.mesh;
             let { x, y, z } = absolutePosition;
@@ -62,19 +63,30 @@ function updateCubePositions(array, matrix) {
             z = Math.round(absolutePosition.z);
 
             // the mesh position
-            mesh.setParent(null);
+            mesh.parent = null; // mesh.setParent(null) !copies parent normals
             mesh.setAbsolutePosition(new Vector3(x, y, z));
 
+            let positions = mesh.getVerticesData(VertexBuffer.PositionKind);
+            let normals = mesh.getVerticesData(VertexBuffer.NormalKind);
+            VertexData.ComputeNormals(positions, mesh.getIndices(), normals);
+            mesh.setVerticesData(VertexBuffer.NormalKind, normals );
+            // updateNormals(mesh, scene);
+            // mesh.updateMeshPositions(new Vector3(x,y,z), true)
+
             return { ...cube, mesh, x, y, z };
-        })
-        .forEach(cube => {
-            matrix[cube.id] = cube;
         });
+
+    updated
+        .forEach(cube => {
+            matrix[cube.id] = { ...cube };
+        });
+
+    return updated;
 }
 
 function createPivot(scene) {
     const origin = new Vector3(0, 0, 0);
-    const options = { diameter: 8, segments: 2 };
+    const options = { diameter: 1, segments: 2 };
     const pivot = MeshBuilder.CreateSphere('pivot', options, scene);
 
     // the rotation parent hull
@@ -84,3 +96,4 @@ function createPivot(scene) {
     pivot.position = origin;
     return pivot;
 }
+

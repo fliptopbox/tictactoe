@@ -54,6 +54,7 @@ function getTerrain(cube, { scene }, player = 0) {
     mat.diffuseColor = new Color3(r, g, b);
     mat.wireframe = false;
     mesh.material = mat;
+    mesh.id = "m" + id;
 
     return cube;
 }

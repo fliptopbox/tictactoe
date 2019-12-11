@@ -21,8 +21,16 @@ const matlib = {
         // ambientColor: new Color3(0.23, 0.98, 0.53),
         wireframe: true
     },
+    black: {
+        diffuseColor: "#000000",
+        wireframe: false
+    },
+    white: {
+        diffuseColor: "#ffffff",
+        wireframe: false
+    },
     surface: {
-        diffuseColor: new Color3(0,0,0),
+        diffuseColor: new Color3(0, 0, 0),
         // specularColor: new Color3(0, 0, 0),
         emissiveColor: new Color3(0, 0, 0),
         // ambientColor: new Color3(0, 0, 0),
@@ -42,8 +50,9 @@ function materials({ scene }) {
             let value = props[k];
             let hex = /^#[0-9a-f]{3,6}$/.test(value || '');
             let rgb = hex ? hexToRGB(value) : null;
+            let [r, g, b] = rgb || [];
 
-            value = rgb ? new Color3(...rgb) : value;
+            value = rgb ? new Color3(r, g, b) : value;
 
             m[k] = value;
         });
