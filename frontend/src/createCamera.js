@@ -4,19 +4,19 @@ import {
 } from 'babylonjs';
 
 export default createCamera;
-function createCamera({scene, canvas}, distance = 8) {
+function createCamera({scene, canvas}, distance = 10) {
     var camera = new ArcRotateCamera(
         'Camera',
         Math.PI / 2,
         Math.PI / 2,
         distance,
-        Vector3.Zero(),
+        new Vector3(2.5,2.5,0),
         scene
     );
 
     camera.fov = 1.5;
     camera.setTarget(Vector3.Zero());
     camera.attachControl(canvas, true);
-    console.log(camera.inputs);
+
     return camera;
 }

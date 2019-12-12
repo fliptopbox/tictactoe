@@ -1,31 +1,35 @@
 export default getRotationProperties;
-function getRotationProperties(object, movement) {
-    // Inputs Mesh Objects -OR- {x,y,z} Literals
-    // returns Object {rotation, amount, extent}
+function getRotationProperties(object) {
+    // Input Mesh Objects -OR- {x,y,z} Literals
     //
+    // object {mesh, dest, normal}
+    // ---------------------------
+    // mesh         Object      mouse down object (origin)
+    // dest         Object      mouse up object (destingation)
+    // normal       Object      face normal coords
+    //
+    // returns Object {rotation, amount, extent}
+    // -----------------------------------------
     // rotation:    String      the axis of rotation (x,y,z)
     // amount:      Integer     the number of revolutions (signed vector)
     // extent:      Integer     the col/row to affect (signed integer)
-    //
 
-    // console.clear();
-    console.log('normal', object.normal);
-    console.log('mesh', object.mesh);
+    let dest = {...object.dest};
+    Object.keys(dest).forEach(k => (dest[k] = object.mesh[k] - object.dest[k]));
+    Object.keys(dest).forEach(k => (dest[k] !== 0 ? dest[k] : delete dest[k]));
 
-    let rotation = 'x';
-    let amount = 1;
-    let extent = 1;
+    // maximum revolutions for this player for this turn
+    const amountMax = 3;
+
+    let rotation;
+    let amount;
+    let extent;
 
     const xyz = ['x', 'y', 'z'];
-    const [deltaX, deltaY] = movement;
-    const delta = Math.abs(deltaX) > Math.abs(deltaY) ? 0 : 1;
-    console.log('delta', xyz[delta], movement[delta]);
 
     const [nX, nY, nZ] = Object.values(object.normal);
     const normal = [nX, nY, nZ].findIndex(v => Math.abs(v));
     const nValue = [nX, nY, nZ][normal];
-
-    console.log('normal', normal, xyz[Math.abs(normal)]);
 
     if (!object.normal || ![nX, nY, nZ].some(b => b)) {
         console.warn('no normals detected');
@@ -33,119 +37,66 @@ function getRotationProperties(object, movement) {
     }
 
     const [mX, mY, mZ] = Object.values(object.mesh);
+    let normalAxis = xyz[Math.abs(normal)];
+    let destAxis = Object.keys(dest)[0];
+    let destValue = Object.values(dest)[0];
+    let clockwise;
 
-    switch (xyz[Math.abs(normal)]) {
+    amount = Math.min(Math.abs(destValue), amountMax);
+
+    switch (normalAxis) {
         case 'x':
-            // horizontal drag
-            extent = mY;
-            rotation = 'y';
-            // vertical drag
-            if (xyz[delta] === 'y') {
+            rotation = destAxis === 'z' ? 'y' : 'z';
+            clockwise = nValue > 0 ? -1 : 1;
+
+            if (destAxis === 'y') {
                 extent = mZ;
-                rotation = 'z';
+                clockwise *= destValue > 0 ? 1 : -1;
             }
 
-            // positive/negative normals reverse direction
-            if (nValue > 0) {
-                console.log('forward >>', rotation, nValue, movement[delta]);
-                amount *= movement[delta] > 0 ? -1 : 1;
-            } else {
-                console.log('backward >>', rotation, nValue, movement[delta]);
-                amount *=
-                    rotation === 'y'
-                        ? movement[delta] > 0
-                            ? -1
-                            : 1
-                        : movement[delta] > 0
-                        ? 1
-                        : -1;
+            if (destAxis === 'z') {
+                extent = mY;
+                clockwise *= destValue > 0 ? -1 : 1;
             }
 
+            amount *= clockwise;
             break;
 
         case 'y':
-            extent = mZ;
-            rotation = 'z';
-            if (xyz[delta] === 'y') {
+            rotation = destAxis === 'z' ? 'x' : 'z';
+            clockwise = nValue > 0 ? 1 : -1;
+
+            if (destAxis === 'x') {
+                extent = mZ;
+                clockwise *= destValue > 0 ? 1 : -1;
+            }
+
+            if (destAxis === 'z') {
                 extent = mX;
-                rotation = 'x';
+                clockwise *= destValue > 0 ? -1 : 1;
             }
-            // positive/negative normals reverse direction
-            if (nValue > 0) {
-                console.log('forward >>', rotation, nValue, movement[delta]);
-                amount *= movement[delta] > 0 ? 1 : -1;
-            } else {
-                console.log('backward >>', rotation, nValue, movement[delta]);
-                amount *=
-                    rotation === 'z'
-                        ? movement[delta] > 0
-                            ? -1
-                            : 1
-                        : movement[delta] > 0
-                        ? 1
-                        : -1;
-            }
+
+            amount *= clockwise;
             break;
 
         case 'z':
         default:
-            extent = mY;
-            rotation = 'y';
-            if (xyz[delta] === 'y') {
+            rotation = destAxis === 'y' ? 'x' : 'y';
+            clockwise = nValue > 0 ? 1 : -1;
+
+            if (destAxis === 'y') {
                 extent = mX;
-                rotation = 'x';
+                clockwise *= destValue > 0 ? 1 : -1;
             }
-            // positive/negative normals reverse direction
-            if (nValue > 0) {
-                console.log('forward >>', rotation, nValue, movement[delta]);
-                amount *=
-                    rotation === 'x'
-                        ? movement[delta] > 0
-                            ? 1
-                            : -1
-                        : movement[delta] > 0
-                        ? -1
-                        : 1;
-            } else {
-                console.log('backward >>', rotation, nValue, movement[delta]);
-                amount *=
-                    rotation === 'x'
-                        ? movement[delta] > 0
-                            ? -1
-                            : 1
-                        : movement[delta] > 0
-                        ? -1
-                        : 1;
+
+            if (destAxis === 'x') {
+                extent = mY;
+                clockwise *= destValue > 0 ? -1 : 1;
             }
+
+            amount *= clockwise;
             break;
     }
 
-    return { rotation, amount, extent };
+    return {rotation, amount, extent};
 }
-
-/** QUOKKA INLINE *!/
-
-let objA, objB;
-
-// two down
-objA = {x:1, y: 1, z: 1}; objB = {x:1, y: -1, z: 1};
-getRotationProperties(objA, objB); //?
-
-// one down
-objA = {x:1, y: 1, z: -1}; objB = {x:1, y: 0, z: -1};
-getRotationProperties(objA, objB); //?
-
-// 5x5 four down
-objA = {x:2, y: 2, z: 0}; objB = {x:2, y: -2, z: 0};
-getRotationProperties(objA, objB); //?
-
-// one right
-getRotationProperties(objA, objB); //?
-
-// two left
-getRotationProperties(objA, objB); //?
-
-// one left
-
-
-/** */

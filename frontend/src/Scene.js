@@ -15,10 +15,34 @@ class Scene extends React.Component {
     constructor() {
         super();
         this.state = {
-            player: 0
+            player: 0,
+            players: [1,2],
+            radius: 0
         };
     }
-    sceneDidMount = generateScene.bind(this);
+
+    rotate = ({rotation, extent, amount}) => {
+        // rotatePlane
+    }
+
+    occupy = (id) => {
+        console.log("occupy", id, this.state.player)
+    }
+
+
+
+    sceneDidMount = (e) => {
+        this.scene = e.scene;
+        this.canvas = e.canvas;
+        this.engine = e.engine;
+
+        const { radius } = this.state;
+        this.camera = createCamera(e, (radius + 1) * 3.6);
+        this.earth = getMatrix(e, radius);
+
+        return generateScene.call(this);
+    }
+
     render() {
         return <Canvas sceneDidMount={this.sceneDidMount} />;
     }
@@ -26,27 +50,29 @@ class Scene extends React.Component {
 
 export default Scene;
 
-function generateScene(e) {
+function generateScene() {
     // const that = this;
-    const { scene, canvas, engine } = e;
-    const diameter = 0;
+    // const { scene, canvas, engine } = e;
+    const { scene, engine, earth } = this;
+    const { radius } = this.state;
 
     engine.runRenderLoop(() => scene && scene.render());
 
-    showAxis((diameter + 1) * 3, scene);
-    createLight(e, 'hemi', 'sun', 0.5, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5]);
+    showAxis((radius + 1) * 3, scene);
+    createLight({scene}, 'hemi', 'sun', 0.5, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5]);
     // createLight(e, 'point', 'point1', 0.8, [0, 6, -1]);
 
-    const earth = getMatrix(e, diameter);
-    let camera = createCamera(e, (diameter + 1) * 3.6);
     // camera.inputs.addMouse();
+
+    // this.earth = earth;
+    // this.camera = camera;
 
     scene.clearColor = new Color3(0.05, 0.05, 0.05);
     scene.onPointerObservable.add(
-        pointerEvents.bind({ camera, scene, earth, canvas })
+        pointerEvents.bind(this)
     );
 
-    earth.filter(c => !c.core).forEach(cube => getTerrain(cube, e, 0));
+    earth.filter(c => !c.core).forEach(cube => getTerrain(cube, {scene}, 0));
 
     window.earth = earth;
 }
