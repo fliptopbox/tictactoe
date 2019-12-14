@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Engine, Scene } from 'babylonjs';
+import { Texture, Engine, Scene, VolumetricLightScatteringPostProcess } from 'babylonjs';
 
 export default class Canvas extends Component {
     constructor({ sceneDidMount, engineOptions, adaptToDeviceRatio }) {
@@ -25,7 +25,7 @@ export default class Canvas extends Component {
             canvas,
             engine,
             engineOptions,
-            adaptToDeviceRatio,
+            adaptToDeviceRatio
         } = this;
 
         if (typeof sceneDidMount !== 'function') {
@@ -52,13 +52,8 @@ export default class Canvas extends Component {
     render() {
         // 'rest' can contain additional properties that you can flow through to canvas:
         // (id, className, etc.)
-        let { width, height } = this.props;
-        let opts = {};
-
-        if (width !== undefined && height !== undefined) {
-            opts.width = '100%';
-            opts.height = '100%';
-        }
+        let { width = '100%', height = '100%' } = this.props;
+        let opts = { ...this.props.opts };
 
         return (
             <canvas

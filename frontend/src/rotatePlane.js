@@ -2,13 +2,13 @@ import { VertexBuffer, VertexData, Animation, Vector3, MeshBuilder, StandardMate
 // import updateNormals from './updateNormals';
 
 export default rotatePlane;
-function rotatePlane(scene, matrix, axis = 'y', extent = 0, rotations = 1) {
+function rotatePlane(scene, matrix, axis = 'y', extent = 0, rotations = 1, rotationFrames = 100) {
     if (!rotations || !/^[xyz]$/.test(axis)) return;
 
-    const speed = 0.36;
+    const speed = 0.3;
     const direction = rotations > 0 ? 1 : -1;
     const amount = [0.5, 1, 1.5, 2][(Math.abs(rotations) - 1) % 4];
-    const duration = 75 * amount * speed;
+    const duration = rotationFrames * speed >> 0;
     const pivot = createPivot(scene);
 
     let collection = matrix.filter(cube => {

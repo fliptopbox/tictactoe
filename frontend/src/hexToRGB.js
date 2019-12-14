@@ -7,6 +7,7 @@ function hexToRGB(hex, float = true) {
 
     hex = hex.replace(/^0x+/, "");
     hex = hex.replace(/[^0-9a-f]+/gi, "");
+    hex = hex.toLowerCase();
 
     let array = hex.length < 6
             ? hex.split(/([0-9a-f]{1})/i)
