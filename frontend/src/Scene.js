@@ -51,7 +51,7 @@ class Scene extends React.Component {
                 }
             ],
             toggleOnDoubleTap: true,
-            radius: 1
+            radius: 0
         };
         this.toggleToNextPlayer.bind(this);
     }
