@@ -30,25 +30,25 @@ class Scene extends React.Component {
             players: [
                 {
                     material: 'black',
-                    playerId: 111,
+                    playerId: '111',
                     twist: 0,
                     alias: '@black',
                     spiecies: 0
                 },
                 {
                     material: 'white',
-                    playerId: 222,
+                    playerId: '222',
                     twist: 0,
                     alias: '@white',
-                    spiecies: 1
-                },
-                {
-                    material: 'red',
-                    playerId: 333,
-                    twist: 0,
-                    alias: '@red',
-                    spiecies: 1
+                    spiecies: 0
                 }
+                // {
+                //     material: 'red',
+                //     playerId: 333,
+                //     twist: 0,
+                //     alias: '@red',
+                //     spiecies: 1
+                // }
             ],
             toggleOnDoubleTap: true,
             radius: 0
@@ -137,26 +137,33 @@ class Scene extends React.Component {
         return array.length;
     }
 
-    occupy = id => {
+    occupy = (id, emulate = null) => {
         const index = id.replace(/^m/i, '');
         const cube = this.earth[index];
 
-        if (cube.owner) return;
+        if (emulate === null && cube.owner) {
+            console.warn('already occupied', id, emulate);
+            return;
+        }
 
         const m = materials(this);
         const { player, players } = this.state;
-        const currentPlayer = players[player];
+        let currentPlayer = emulate === null ? players[player] : emulate;
         const playerMaterial = currentPlayer.material;
-        const {x,y,z, axis} = cube;
-        const coord = [x,y,z].join(",");
-        const hash = axis ? "#" : "";
-
-        currentPlayer.twist += 1;
+        const { x, y, z, axis } = cube;
+        const coord = [x, y, z].join(',');
+        const hash = axis ? '#' : '';
 
         cube.owner = currentPlayer.playerId;
         cube.mesh.material = m(playerMaterial, `${id}(${coord})${hash}`);
 
         console.log('occupy', id, cube);
+
+        // if game data is importing so do not
+        // toggle to next player
+        if (emulate !== null) return;
+
+        currentPlayer.twist += 1;
 
         // does the game continue?
         if (this.updateScore()) {
@@ -242,10 +249,9 @@ function generateScene() {
     createLight({ scene }, 'point', 'point1', 0.4, [0, 6, -1]);
     createLight({ scene }, 'point', 'core1', 1.4, [0, 0, 0]);
 
-
     const god = earth[13].mesh;
     god.billboardMode = Mesh.BILLBOARDMODE_ALL;
-    god.emissiveColor = new Color3(1,0,0);
+    god.emissiveColor = new Color3(1, 0, 0);
     god.visibility = 1;
     god.alpha = 0.2;
     var godrays = new VolumetricLightScatteringPostProcess(
@@ -259,34 +265,58 @@ function generateScene() {
         false
     );
 
-    // godrays._volumetricLightScatteringRTT.renderParticles = true;
-
-    // godrays.exposure = 0.1;
-    // godrays.decay = 0.96815;
-    // godrays.weight = 0.98767;
-    // godrays.density = 0.996;
-
-    // // set the godrays texture to be the image.
-    // godrays.mesh.material.diffuseTexture = new Texture(
-    //     'textures/BJS-logo_v3.png',
-    //     scene
-    // );
-    // godrays.mesh.material.diffuseTexture.hasAlpha = true;
-
-
-
-
-    // this.earth = earth;
-    // this.camera = camera;
-
     scene.clearColor = new Color3(0.05, 0.05, 0.05);
     scene.onPointerObservable.add(pointerEvents.bind(this));
 
     earth.filter(c => !c.core).forEach(cube => getTerrain(cube, { scene }, 0));
 
     window.earth = earth;
+    window.getGameState = object => getGameState.call(this, object);
+    window.setGameState = k => setGameState.call(this, k);
 }
 
 function rnd(max, min = 0) {
     return (Math.random() * max + min) >> 0;
+}
+
+function setGameState(key) {
+    // export state and matrix
+    let { state, earth } = this;
+    const matrix = earth.map(o => {
+        delete o.mesh;
+        return { ...o };
+    });
+
+    const json = {
+        state,
+        matrix
+    };
+
+    localStorage[key] = JSON.stringify(json, null, 4);
+    return json;
+}
+
+function getGameState(object) {
+    if (typeof object === 'string') object = JSON.parse(object);
+
+    const occupy = this.occupy.bind(this);
+    let { state, matrix } = object;
+
+    // merge the JSON data into the existing terrain data
+    // and render the updated cube
+    this.state = { ...this.state, ...state };
+
+    const emulate = {};
+    this.state.players.forEach(p => (emulate[p.playerId] = p));
+
+    matrix = matrix.filter(o => o.owner);
+    matrix.forEach(row => {
+        const { id, owner } = row;
+        this.earth[id] = {
+            ...this.earth[id],
+            ...row
+        };
+
+        occupy.call(this, `m${id}`, emulate[owner]);
+    }, this);
 }
