@@ -67,6 +67,16 @@ function getTerrain(cube, { scene }) {
     return cube;
 }
 
+
+
+const CORNER = 3;
+const DOUBLE = 2;
+const SINGLE = 1;
+const INTERNAL = 0;
+
+
+
+
 function setTerrain(offset, x, y, z) {
     // flag intenal instances
     const core =
@@ -77,12 +87,12 @@ function setTerrain(offset, x, y, z) {
     const az = Math.abs(z);
 
     let type = 0;
-    type = Number(ax + ay + az) === offset * 3 ? 3 : 0;
-    type = type ? type : Number(ax + ay) === offset * 3 - offset && 2;
-    type = type ? type : Number(ax + az) === offset * 3 - offset && 2;
-    type = type ? type : Number(ay + az) === offset * 3 - offset && 2;
-    type = type ? type : 1; // interior surfaces
-    type = core ? 0 : type; // invisible
+    type = Number(ax + ay + az) === offset * CORNER ? CORNER : 0;
+    type = type ? type : Number(ax + ay) === offset * CORNER - offset && DOUBLE;
+    type = type ? type : Number(ax + az) === offset * CORNER - offset && DOUBLE;
+    type = type ? type : Number(ay + az) === offset * CORNER - offset && DOUBLE;
+    type = type ? type : SINGLE; // interior surfaces
+    type = core ? INTERNAL : type; // invisible
 
     // flag XYZ axis - the polar plate on each face
     let axis =
@@ -105,20 +115,21 @@ function getNaturalColor(type, axis = false) {
     return array[(Math.random() * array.length) >> 0];
 }
 
-function getDynamicTexture(scene, m, diffuseColor, text) {
+function getDynamicTexture(scene, material, diffuseColor, text) {
     const font = 'bold 20px Arial';
     const color = "white";
-    let dynTex = new DynamicTexture(
+    const dynTex = new DynamicTexture(
         'dtex',
         { width: 150, height: 150 },
         scene,
         true
     );
 
-    m.diffuseTexture = dynTex;
     dynTex.drawText(text, 10, 40, font, color, diffuseColor, true, true);
 
-    m.diffuseTexture.uOffset = 0;
-    m.diffuseTexture.vOffset = 0;
-    return m;
+    material.diffuseTexture = dynTex;
+    material.diffuseTexture.uOffset = 0;
+    material.diffuseTexture.vOffset = 0;
+
+    return material;
 }
