@@ -1,73 +1,87 @@
 import gamedata from "./finished-game.json";
-import { AttachToBoxBehavior } from "babylonjs";
 
 let radius = 0;
 let cubes = 0;
 let owner = 222;
 const collection = {};
 
-const axes = gamedata.filter(row => {
-    radius = Math.max(radius, row.x);
-    cubes += row.type ? 1 : 0;
-    return row.axis && row.owner === owner;
-}); //? $.length
 
-axes.forEach(c => (collection[c.id] = owner));
+function getFaceArray(data, owner) {
 
-const N = radius * 2 + 1; //?
-
-instantVictory(axes, radius, collection); //?.
-
-function instantVictory(axes, radius, occupancy) {
-    // one player occuping an entire face is instant victory
-    const candidates = axes.filter(cube => !cube);
-    if (!candidates || !candidates.length) return false;
-
-    // check the rows for each axis
-    // if one row is incomplete disregard the face
-    candidates.forEach(axis => {
-        axis;
-        getRows(axis, radius).forEach(index => {
-            occupancy[index]; //?
-        });
+    const array = [...data];
+    let depth = 0;
+    let count = 0;
+    
+    [ ...array ].forEach(row => {
+        depth = Math.max(depth, row.x)
+        count += row.owner === owner ? 1 : 0;
     });
-}
 
-function getColumns(axis, radius) {
-    const columns = getVector(axis, radius).map(v => getVector(v, 1, true));
-    return [].concat(...columns);
-}
+    const faces = {
+        depth,
+        count,
+        x: [[], []],
+        y: [[], []],
+        z: [[], []]
+    };
 
-function getRows(axis, radius) {
-    const rows = getVector(axis, radius, true).map(v => getVector(v, 1));
-    return [].concat(...rows);
-}
+    [ ...array ].forEach(row => {
+        // if(!row || row.owner !== owner) return;
+        const {x, y, z} = row;
 
-function getDiagonals(axis, radius) {
-    const diags = [-1, 1].map(n => getVector(axis, radius, true, n));
-    return [].concat(...diags); //?
-}
-
-function getVector(cubes = null, axis, radius, vertical, offset = 0) {
-    const N = radius * 2 + 1;
-    let array = cubes && cubes.constructor === Array ? cubes : [...Array(N)];
-    const diagonal = Math.abs(offset);
-    array = array.map((_, i) => {
-        const normal = i - radius;
-        return (
-            axis +
-            normal * (vertical ? N : 1) +
-            (diagonal ? normal * offset : 0)
-        );
+        if(Math.abs(x) === depth) faces.x[x < 0 ? 0 : 1].push(row)
+        if(Math.abs(y) === depth) faces.y[y < 0 ? 0 : 1].push(row)
+        if(Math.abs(z) === depth) faces.z[z < 0 ? 0 : 1].push(row)
     });
-    return [...array];
+
+    return faces;
 }
 
+// const z1 = getFaceArray(gamedata.matrix, owner).z[1]; //?
+// const z2 = getFaceArray(gamedata.matrix, owner).z[0]; //?
 
-function getFilter(radius, type = 0, value = 0) {
+
+// getFilter(1, "backslash").map(index => String(z1[index].owner) === "111" ? 1 : null).reduce((a, c) => a + c, 0) //?
+// getFilter(1, "forwardslash").map(index => String(z1[index].owner) === "111" ? 1 : null).reduce((a, c) => a + c, 0) //?
+// getFilter(1, "row", 0).map(index => String(z1[index].owner) === "111" ? 1 : null).reduce((a, c) => a + c, 0) //?
+// getFilter(1, "row", 1).map(index => String(z1[index].owner) === "111" ? 1 : null).reduce((a, c) => a + c, 0) //?
+// getFilter(1, "row", 2).map(index => String(z1[index].owner) === "111" ? 1 : null).reduce((a, c) => a + c, 0) //?
+
+// getFilter(1, "backslash").map(index => String(z2[index].owner) === "222" ? 1 : null).reduce((a, c) => a + c, 0) //?
+// getFilter(1, "forwardslash").map(index => String(z2[index].owner) === "222" ? 1 : null).reduce((a, c) => a + c, 0) //?
+// getFilter(1, "row", 0).map(index => String(z2[index].owner) === "222" ? 1 : null).reduce((a, c) => a + c, 0) //?
+// getFilter(1, "row", 1).map(index => String(z2[index].owner) === "222" ? 1 : null).reduce((a, c) => a + c, 0) //?
+// getFilter(1, "row", 2).map(index => String(z2[index].owner) === "222" ? 1 : null).reduce((a, c) => a + c, 0) //?
+
+
+
+function getScore(matrix, playerId = 222) {
+    const radius = getRadiusFromMatix(matrix);
+    const re = new RegExp(`${playerId}`,"i")
+    const z2 = getFaceArray(matrix, owner).z[0];
+    const score = getFilter(radius, "backslash")
+        .reduce((acc, c) => ((re.test(z2[c].owner) ? 1 : 0) + acc), 0);
+
+    return score;
+}
+
+getScore(gamedata.matrix, 222); //?
+
+function getRadiusFromMatix(matrix) {
+    return Math.max.apply(null, matrix.map(r => r.x)); //?
+}
+
+getRadiusFromMatix(gamedata.matrix); //?.
+
+
+function getFilter(radius, type = 0, value = 0, negate = true) {
     const odd = Math.abs(radius % 2);
     const diameter = (radius * 2) + odd;
     const N = (radius * 2 + odd) ** 2;
+
+    // returns the negated index OR remove output
+    const empty = (n) => negate === true ? null : -n;
+
 
     let array = [...Array(N)].map((_, i) => i);
 
@@ -80,14 +94,14 @@ function getFilter(radius, type = 0, value = 0) {
         case "column":
         case "vertical":
             // columns (type: 1, value: column index)
-            condition = (i) => ((i % N) % diameter === value ? i : null);
+            condition = (i) => ((i % N) % diameter === value ? i : empty(i));
             break;
 
         case "1":
         case "row":
         case "horizontal":
             // rows (type: 0, value: row index)
-            condition = (i) => ((i / diameter) >> 0 === value ? i : null);
+            condition = (i) => ((i / diameter) >> 0 === value ? i : empty(i));
             break;
 
         case "2":
@@ -96,7 +110,7 @@ function getFilter(radius, type = 0, value = 0) {
         case "backslash":
             // diagonal -45' \ (type: 1, value: NA)
             value = 0;
-            condition = (i) => (i % (diameter + 1) === value ? i : null);
+            condition = (i) => (i % (diameter + 1) === value ? i : empty(i));
             break;
 
         case "3":
@@ -109,14 +123,15 @@ function getFilter(radius, type = 0, value = 0) {
             condition = (i) =>
                 ((i % N) % diameter + 1) + ((i / diameter) >> 0) === value
                     ? i
-                    : null;
+                    : empty(i);
             break;
 
         default:
             return null;
     }
 
-    // remove all the "null" values, and return the relative indexes
+    // remove all the "null" values, and returns the relative indexes
+    // (setting negate = true, it will return the negative index value)
     return array.map(condition).filter(index => index !== null);
 
 }
@@ -131,7 +146,7 @@ function getFilter(radius, type = 0, value = 0) {
 // 8 9 a b
 // c d e f
 
-getFilter(1, "row", 0); //?
+getFilter(1, "row", 0, -1); //?
 getFilter(1, "col", 0); //?
 
 getFilter(2, "row", 0); //?
