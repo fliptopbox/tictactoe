@@ -11,8 +11,6 @@ function getMatrix({scene}, diameter = 1) {
 
         var mesh = CreateBox(id, { size }, scene);
         mesh.position = new Vector3(x, y, z);
-        // mesh.material = m(material);
-
 
         return {
             ...cube,

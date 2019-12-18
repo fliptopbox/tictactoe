@@ -10,12 +10,12 @@ function createCamera({scene, canvas}, distance = 10) {
         Math.PI / 2,
         Math.PI / 2,
         distance,
-        new Vector3(2.5,2.5,0),
+        new Vector3(2.5,1.5,0),
         scene
     );
 
     camera.fov = 1.5;
-    camera.setTarget(Vector3.Zero());
+    camera.setTarget(new Vector3(0, -1.2, 0));
     camera.attachControl(canvas, true);
 
     return camera;

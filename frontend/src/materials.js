@@ -12,6 +12,9 @@ const matlib = {
         // emissiveColor: new Color3(0, 0, 0),
         // ambientColor: new Color3(0.23, 0.98, 0.53)
     },
+    ground: {
+        diffuseColor: "#222222"
+    },
     solid: {
         diffuseColor: new Color3(1, 0, 1)
         // specularColor: new Color3(0.5, 0.6, 0.87),

@@ -2,6 +2,7 @@ import * as React from 'react';
 import {
     Mesh,
     Color3,
+    Vector3,
     Texture,
     VolumetricLightScatteringPostProcess
 } from 'babylonjs';
@@ -15,40 +16,45 @@ import showAxis from './showAxis';
 import { getTerrain } from './terrain';
 import pointerEvents from './pointerEvents';
 import rotatePlane from './rotatePlane';
+import getScore from './calculateScore';
+import explodeMatrix from './explodeMatrix';
 
+import Player from './Player';
 import './ui.css';
 
 class Scene extends React.Component {
     constructor() {
         super();
         this.state = {
-            playDelay: 560, // non-human turn delay
+            playDelay: 550, // non-human turn delay
             rotationFrames: 50, // milseconds of animation
             focusOnOccupy: true, // move camera to occupaion cube
-            blur: false,
+            twistsPerPlay: 2,
+            showCubeCoords: false,
             player: 0,
+            finished: false,
             players: [
                 {
                     material: 'black',
                     playerId: '111',
                     twist: 0,
                     alias: '@black',
-                    spiecies: 0
+                    spiecies: 1
                 },
                 {
                     material: 'white',
                     playerId: '222',
                     twist: 0,
                     alias: '@white',
-                    spiecies: 0
+                    spiecies: 1
+                },
+                {
+                    material: 'red',
+                    playerId: '333',
+                    twist: 0,
+                    alias: '@red',
+                    spiecies: 1
                 }
-                // {
-                //     material: 'red',
-                //     playerId: 333,
-                //     twist: 0,
-                //     alias: '@red',
-                //     spiecies: 1
-                // }
             ],
             toggleOnDoubleTap: true,
             radius: 0
@@ -56,7 +62,7 @@ class Scene extends React.Component {
         this.toggleToNextPlayer.bind(this);
     }
 
-    executeNonHumanPlayer = player => {
+    executeNonHumanPlayer = (player, ms = 0) => {
         // this.setState({ player });
 
         const { earth, rotate, executeNonHumanPlayer, occupy } = this;
@@ -73,12 +79,12 @@ class Scene extends React.Component {
         setTimeout(function() {
             if (currentPlayer.twist && twist) {
                 rotate({ rotation, extent, amount });
-                executeNonHumanPlayer(player);
+                executeNonHumanPlayer(player, ms + 150);
                 return;
             }
             // turn always ends with "occupy"
             occupy(cube.mesh.id);
-        }, playDelay);
+        }, playDelay + ms);
     };
 
     rotate = ({ rotation, extent, amount }) => {
@@ -122,22 +128,45 @@ class Scene extends React.Component {
         }
     };
 
+    getCurrentPlayer() {
+        let { player, players } = this.state;
+        return players[player];
+    }
+
     updateScore() {
         const { earth } = this;
-        if (!earth) return null;
+        const { finished } = this.state;
 
+        if (!earth || finished) return null;
+
+        const { playerId } = this.getCurrentPlayer();
+        const score = getScore(earth, playerId);
         const array = earth.filter(c => !c.owner && c.type);
         console.log('cubes free', array.length);
+        console.log(score);
 
-        if (!array.length) {
+        if (score.finished) {
             console.log('game over');
-            window.alert('game over');
+            this.setState({ finished: true });
         }
 
-        return array.length;
+        return score;
     }
 
     occupy = (id, emulate = null) => {
+        const {
+            player,
+            players,
+            finished,
+            twistsPerPlay,
+            showCubeCoords
+        } = this.state;
+
+        if (finished) {
+            alert('The game is over');
+            return;
+        }
+
         const index = id.replace(/^m/i, '');
         const cube = this.earth[index];
 
@@ -147,27 +176,39 @@ class Scene extends React.Component {
         }
 
         const m = materials(this);
-        const { player, players } = this.state;
         let currentPlayer = emulate === null ? players[player] : emulate;
         const playerMaterial = currentPlayer.material;
+        const { playerId } = currentPlayer;
         const { x, y, z, axis } = cube;
-        const coord = [x, y, z].join(',');
-        const hash = axis ? '#' : '';
 
         cube.owner = currentPlayer.playerId;
-        cube.mesh.material = m(playerMaterial, `${id}(${coord})${hash}`);
 
-        console.log('occupy', id, cube);
+        if (showCubeCoords) {
+            const coord = [x, y, z].join(',');
+            const hash = axis ? '#' : '';
+            cube.mesh.material = m(playerMaterial, `${id}(${coord})${hash}`);
+        }
+        cube.mesh.material = m(playerMaterial); //, `${id}(${coord})${hash}`);
+        const scale = 1.08;
+        cube.mesh.scaling = new Vector3(scale, scale, scale);
 
-        // if game data is importing so do not
-        // toggle to next player
+        console.log('occupy', playerId, id, cube);
+
+        // if game data is importing do not toggle to next player
         if (emulate !== null) return;
 
-        currentPlayer.twist += 1;
+        currentPlayer.twist += twistsPerPlay;
 
         // does the game continue?
-        if (this.updateScore()) {
+        const score = this.updateScore();
+        if (!score.finished) {
             this.toggleToNextPlayer();
+        } else {
+            explodeMatrix(
+                { scene: this.scene, earth: this.earth },
+                score.leader,
+                0.25
+            );
         }
     };
 
@@ -184,43 +225,59 @@ class Scene extends React.Component {
     };
 
     getCurrentPlayerInfo() {
-        const { player, players } = this.state;
-        const currentPlayer = players[player];
-        let { alias, material, spiecies, twist } = currentPlayer;
+        // render all contestants
 
-        const style = { background: material };
-        const free = this.updateScore();
-        spiecies = ['human', 'random', 'AI'][spiecies];
+        const { players, player } = this.state;
 
-        const showTwist = twist ? (
-            <div className="ui-player-twist">twist: {twist || 'none'}</div>
-        ) : null;
-
-        const showFree =
-            free !== null ? (
-                <div className="ui-player-free">Free: {free || 'none'}</div>
-            ) : null;
-
-        return (
-            <div className="ui-player">
-                <div className="ui-player-icon">
-                    <div className="ui-player-color" style={style}></div>
-                    <div className="ui-player-alias">{alias}</div>
-                    <div className="ui-player-spiecies">{spiecies}</div>
-                </div>
-
-                {showTwist}
-                {showFree}
-            </div>
-        );
+        return players.map((obj, n) => (
+            <Player key={n} player={obj} current={n === player} />
+        ));
     }
 
     render() {
-        console.log('render', this.state.blur);
         const opts = {};
+        // const { earth } = this;
+
+        let total = 0,
+            hexes = null,
+            cubes = null,
+            free,
+            percent = 0;
+
+        if (this.earth) {
+            cubes = this.earth.filter(o => o.type);
+            total = cubes.length;
+            free =
+                this.earth.reduce(
+                    (acc, curr) => acc + (!curr.type || !curr.owner ? 1 : 0),
+                    0
+                ) - 1;
+
+            hexes = !free
+                ? null
+                : cubes.slice(-free).map((o, i) => {
+                      return (
+                          <span
+                              className="swatch"
+                              key={'hex' + i}
+                              style={{ background: o.mesh.hex }}></span>
+                      );
+                  });
+            percent = 100 - (((free / total) * 100) >> 0);
+            console.log('hex', hexes && hexes.length);
+        }
+
+        console.log('render', total, free, percent);
+        const style = { width: `${percent}%` };
+
         return (
             <div className="ui-container">
-                <div className="ui">{this.getCurrentPlayerInfo()}</div>
+                <div className="ui">
+                    <div className="ui-players" style={style}>
+                        {this.getCurrentPlayerInfo()}
+                    </div>
+                    <div className="ui-terrain">{hexes}</div>
+                </div>
                 <Canvas sceneDidMount={this.sceneDidMount} opts={opts} />;
             </div>
         );
@@ -254,7 +311,7 @@ function generateScene() {
     god.emissiveColor = new Color3(1, 0, 0);
     god.visibility = 1;
     god.alpha = 0.2;
-    var godrays = new VolumetricLightScatteringPostProcess(
+    new VolumetricLightScatteringPostProcess(
         'godrays',
         1.0,
         camera,
@@ -265,10 +322,12 @@ function generateScene() {
         false
     );
 
-    scene.clearColor = new Color3(0.05, 0.05, 0.05);
+    scene.clearColor = new Color3(0.1, 0.1, 0.1);
     scene.onPointerObservable.add(pointerEvents.bind(this));
 
+    // bump the state, to propogate the earth data
     earth.filter(c => !c.core).forEach(cube => getTerrain(cube, { scene }, 0));
+    this.setState({ ready: true });
 
     window.earth = earth;
     window.getGameState = object => getGameState.call(this, object);
@@ -297,7 +356,10 @@ function setGameState(key) {
 }
 
 function getGameState(object) {
-    if (typeof object === 'string') object = JSON.parse(object);
+    if (typeof object === 'string') {
+        object = localStorage[object] || object;
+        object = JSON.parse(object);
+    }
 
     const occupy = this.occupy.bind(this);
     let { state, matrix } = object;

@@ -45,7 +45,7 @@ for (let i = 65; i >= 25; i -= 5) {
 // let mat = null;
 
 function getTerrain(cube, { scene }) {
-    const dev = true;
+    const dev = false;
     const { type, axis, mesh, id } = cube;
     const coord = [cube.x, cube.y, cube.z].join(',');
     const label = `${id}(${coord})${axis ? '#' : ''}`;
@@ -63,6 +63,7 @@ function getTerrain(cube, { scene }) {
     mat.wireframe = false;
     mesh.material = mat;
     mesh.id = 'm' + id;
+    mesh.hex = hex;
 
     return cube;
 }
