@@ -29,18 +29,21 @@ const matlib = {
         wireframe: true
     },
     red: {
-        diffuseColor: '#FF0011',
+        diffuseColor: '#FF0000',
         ambientColor: '#000011',
         emissiveColor: '#111111',
+        textColor: '#000000',
         wireframe: false
     },
     black: {
-        diffuseColor: '#111111',
+        diffuseColor: '#030303',
         emissiveColor: '#000000',
+        textColor: '#ffffff',
         wireframe: false
     },
     white: {
-        diffuseColor: '#eeeeee',
+        diffuseColor: '#EFEFEF',
+        textColor: '#000000',
         wireframe: false
     },
     surface: {
@@ -93,10 +96,15 @@ function materials({ scene }) {
             let rgb = hex ? hexToRGB(value) : null;
             let [r, g, b] = rgb || [];
 
+            // add the hexColor to mesh.material properties
+            if (k === 'diffuseColor' ) m.hexColor = value;
+
+            // convert hex string into Color3
             value = rgb ? new Color3(r, g, b) : value;
 
             // skip dynTexture cube w. diffuseColor
             if (k === 'diffuseColor' && text) return;
+
             m[k] = value;
         });
         return m;

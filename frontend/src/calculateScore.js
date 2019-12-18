@@ -106,8 +106,9 @@ function getScore(matrix, playerId) {
         subtotal,
         total
     }; //?
-    const leader = scoreCard(playerId, stats);
-    stats.leader = leader;
+    const rank = scoreCard(playerId, stats);
+    stats.leader = rank[0];
+    stats.rank = rank;
 
     return stats;
 }
@@ -123,11 +124,11 @@ function scoreCard(playerId, object) {
 
     runningTotal[playerId] = { playerId, accumulated, current };
 
-    const leader = Object.values(runningTotal).sort(
+    const rank = Object.values(runningTotal).sort(
         (a, b) => b.accumulated - a.accumulated
     );
 
-    return leader[0].playerId;
+    return rank;
 }
 
 function getRadiusFromMatix(matrix) {

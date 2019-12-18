@@ -206,7 +206,7 @@ class Scene extends React.Component {
         } else {
             explodeMatrix(
                 { scene: this.scene, earth: this.earth },
-                score.leader,
+                score,
                 0.25
             );
         }
@@ -236,46 +236,25 @@ class Scene extends React.Component {
 
     render() {
         const opts = {};
-        // const { earth } = this;
-
-        let total = 0,
-            hexes = null,
-            cubes = null,
-            free,
-            percent = 0;
-
-        if (this.earth) {
-            cubes = this.earth.filter(o => o.type);
-            total = cubes.length;
-            free =
-                this.earth.reduce(
-                    (acc, curr) => acc + (!curr.type || !curr.owner ? 1 : 0),
-                    0
-                ) - 1;
-
-            hexes = !free
-                ? null
-                : cubes.slice(-free).map((o, i) => {
+        const { earth } = this;
+        const hexes = !earth
+            ? null
+            : earth
+                  .filter(c => c.type)
+                  .map((o, i) => {
+                      const { hexColor } = o.mesh.material;
+                      const bgcolor = { background: hexColor };
                       return (
                           <span
                               className="swatch"
-                              key={'hex' + i}
-                              style={{ background: o.mesh.hex }}></span>
+                              key={'hx' + i}
+                              style={bgcolor}></span>
                       );
                   });
-            percent = 100 - (((free / total) * 100) >> 0);
-            console.log('hex', hexes && hexes.length);
-        }
-
-        console.log('render', total, free, percent);
-        const style = { width: `${percent}%` };
 
         return (
             <div className="ui-container">
                 <div className="ui">
-                    <div className="ui-players" style={style}>
-                        {this.getCurrentPlayerInfo()}
-                    </div>
                     <div className="ui-terrain">{hexes}</div>
                 </div>
                 <Canvas sceneDidMount={this.sceneDidMount} opts={opts} />;

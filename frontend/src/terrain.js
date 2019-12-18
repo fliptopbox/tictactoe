@@ -63,7 +63,7 @@ function getTerrain(cube, { scene }) {
     mat.wireframe = false;
     mesh.material = mat;
     mesh.id = 'm' + id;
-    mesh.hex = hex;
+    mesh.material.hexColor = hex;
 
     return cube;
 }

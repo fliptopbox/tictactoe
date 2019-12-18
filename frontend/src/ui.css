@@ -29,7 +29,8 @@
 .swatch {
     flex: 1 0 auto;
     display: block;
-    width: 10px;
+    height: 10px;
+    margin: 0;
 }
 .ui-players {
     flex: 1 0 auto;
@@ -46,7 +47,6 @@
     flex: 1 0 auto;
     display: flex;
     justify-content: space-between;
-    background: green;
 }
 
 .ui-player-current.ui-player {
