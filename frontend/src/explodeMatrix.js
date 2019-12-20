@@ -1,10 +1,15 @@
-import {Vector3, Space} from 'babylonjs';
+import { Vector3, Space } from 'babylonjs';
 import BezierEasing from 'bezier-easing';
 
 export default explodeMatrix;
-function explodeMatrix({scene, earth}, score, amount = 2, duration = 250) {
+function explodeMatrix(
+    { scene, earth },
+    score,
+    multiplier = 0.18,
+    duration = 750
+) {
     let players = {}; // playerId indexed dictionary
-    score.rank.forEach((p, i) => (players[p.playerId] = {...p, rank: i}));
+    score.rank.forEach((p, i) => (players[p.playerId] = { ...p, rank: i }));
     const winner = score.rank[0].playerId;
 
     earth
@@ -14,34 +19,62 @@ function explodeMatrix({scene, earth}, score, amount = 2, duration = 250) {
             return cube.mesh;
         })
         .forEach(m => {
-            const {x, y, z} = m.absolutePosition;
-            const {displace} = m;
+            const { x, y, z } = m.absolutePosition;
+            const { displace } = m;
 
             if (!displace) return;
 
-            animationStack(scene, m, [x, y, z], displace, duration);
+            console.log('displace', m.id, displace, duration, multiplier);
+            animationStack(
+                scene,
+                m,
+                [x, y, z],
+                displace * multiplier,
+                duration
+            );
         });
 }
 
-function animationStack(scene, mesh, xyz, size, time) {
-    var easing = BezierEasing(0.13, 0.69, 0.58, 1);
+function animationStack(scene, mesh, xyz, distance, time) {
+    // var easing = BezierEasing(0.13, 0.69, 0.58, 1);
+    var easing = BezierEasing(0.25, 5, 0, 1);
     const [x, y, z] = xyz;
-    const frames = 30;
+    const frames = 50;
     const steps = (time / frames) >> 0;
     const total = steps * frames;
     const pos = new Vector3(x, y, z);
+
+    let lastFloat = 0;
     let done = false;
 
     for (let i = 0; i <= total; i += steps) {
-        const temp = (easing(i / total) * 1000 >> 0) / 1000;
-        // console.log(i, size, temp * size);
-        setTimeout(() => mesh.translate(pos, temp * size, Space.WORLD), i);
+        let floatNormal = easing(i / total);
+        let value = 0;
+
+        // translate value is scalar, convert the normal
+        // into positive (explode) or negative (implode) value
+        value =
+            floatNormal >= lastFloat
+                ? (value = floatNormal * distance)
+                : distance * (distance * lastFloat * (floatNormal - lastFloat));
+
+        // console.log(
+        //     padd(i),
+        //     padd(((distance * 1000) >> 0) / 1000),
+        //     padd(((lastFloat * 1000) >> 0) / 1000),
+        //     padd(((value * 1000) >> 0) / 1000),
+        //     padd(((floatNormal * 1000) >> 0) / 1000)
+        // );
+
+        lastFloat = floatNormal;
+
+        setTimeout(() => mesh.translate(pos, value, Space.WORLD), i);
 
         if (i >= total && !done) {
+            done = true;
+            const spin = rnd(5, 0.1) * 360; // larger is slower
+            const [x, y, z] = [rnd(2, -2), rnd(2, -2), rnd(2, -2)];
             rotationLoop(scene, () => {
-                done = true;
-                const spin = rnd(5, 0.1) * 1024;
-                const [x, y, z] = [rnd(3, -3), rnd(1, -1), 0];
                 mesh.rotate(new Vector3(x, y, z), Math.PI / spin, Space.LOCAL);
             });
         }
@@ -56,3 +89,7 @@ function rnd(max, min = 0, float = true) {
     const n = Math.random() * max + min;
     return float ? n : n >> 0;
 }
+
+// function padd(string, len = 8) {
+//     return String(` ${string}      `).slice(0, len);
+// }

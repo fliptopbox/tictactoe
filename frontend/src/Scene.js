@@ -207,7 +207,6 @@ class Scene extends React.Component {
             explodeMatrix(
                 { scene: this.scene, earth: this.earth },
                 score,
-                0.25
             );
         }
     };
@@ -320,9 +319,10 @@ function rnd(max, min = 0) {
 function setGameState(key) {
     // export state and matrix
     let { state, earth } = this;
-    const matrix = earth.map(o => {
-        delete o.mesh;
-        return { ...o };
+    const matrix = [].concat(...earth).map(o => {
+        const shallow = {...o};
+        delete shallow.mesh;
+        return shallow;
     });
 
     const json = {
@@ -331,7 +331,6 @@ function setGameState(key) {
     };
 
     localStorage[key] = JSON.stringify(json, null, 4);
-    return json;
 }
 
 function getGameState(object) {
