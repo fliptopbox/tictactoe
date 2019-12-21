@@ -27,7 +27,8 @@ function pointerEvents(e) {
 
     switch (type) {
         case POINTERDOWN:
-            if (pickedMesh && pickInfo) {
+            console.log(pickedMesh, pickInfo);
+            if (pickedMesh && pickedMesh.id && /^m/.test(pickedMesh.id) && pickedMesh && pickInfo) {
                 camera.detachControl(canvas);
                 down = true;
 

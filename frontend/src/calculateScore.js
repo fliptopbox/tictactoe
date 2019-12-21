@@ -19,11 +19,17 @@ function getFaceArray(dataset) {
     return faces;
 }
 
+function getOwner(cube) {
+    console.log(cube);
+    if(!cube || !cube.owner) return "";
+    return cube.owner
+}
+
 function getLattice(iterations, type, facet, radius, re, diameter) {
     return iterations.map(i => {
         return getFilter(radius, type, i).reduce(
             (acc, c) =>
-                (re.test(facet[c].owner)
+                (re.test(getOwner(facet[c]))
                     ? i && i < diameter - 1
                         ? 1
                         : 1
@@ -36,7 +42,7 @@ function getLattice(iterations, type, facet, radius, re, diameter) {
 function getDiagonals(re, facet, diameter, radius) {
     return ['backslash', 'forwardslash'].map(type =>
         getFilter(radius, type).reduce(
-            (acc, c) => (re.test(facet[c].owner) ? 1 : 0) + acc,
+            (acc, c) => (re.test(getOwner(facet[c])) ? 1 : 0) + acc,
             0
         ) === diameter
             ? diameter

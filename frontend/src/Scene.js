@@ -18,6 +18,7 @@ import pointerEvents from './pointerEvents';
 import rotatePlane from './rotatePlane';
 import getScore from './calculateScore';
 import explodeMatrix from './explodeMatrix';
+import radialLineCluster from './radialLineCluster';
 
 import Player from './Player';
 import './ui.css';
@@ -39,7 +40,7 @@ class Scene extends React.Component {
                     playerId: '111',
                     twist: 0,
                     alias: '@black',
-                    spiecies: 1
+                    spiecies: 0
                 },
                 {
                     material: 'white',
@@ -217,7 +218,8 @@ class Scene extends React.Component {
         this.engine = e.engine;
 
         const { radius } = this.state;
-        this.camera = createCamera(e, (radius + 1) * 3.6);
+        // this.camera = createCamera(e, (radius + 1) * 3.6);
+        this.camera = createCamera(e);
         this.earth = getMatrix(e, radius);
 
         return generateScene.call(this);
@@ -306,6 +308,8 @@ function generateScene() {
     // bump the state, to propogate the earth data
     earth.filter(c => !c.core).forEach(cube => getTerrain(cube, { scene }, 0));
     this.setState({ ready: true });
+
+    radialLineCluster(scene);
 
     window.earth = earth;
     window.getGameState = object => getGameState.call(this, object);

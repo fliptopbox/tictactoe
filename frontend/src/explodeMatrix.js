@@ -1,5 +1,6 @@
 import { Vector3, Space } from 'babylonjs';
 import BezierEasing from 'bezier-easing';
+import { percentToAbsolute } from './utilities';
 
 export default explodeMatrix;
 function explodeMatrix(
@@ -43,30 +44,17 @@ function animationStack(scene, mesh, xyz, distance, time) {
     const steps = (time / frames) >> 0;
     const total = steps * frames;
     const pos = new Vector3(x, y, z);
+    const absValue = percentToAbsolute();
 
-    let lastFloat = 0;
+    // let lastFloat = 0;
     let done = false;
 
     for (let i = 0; i <= total; i += steps) {
         let floatNormal = easing(i / total);
-        let value = 0;
 
-        // translate value is scalar, convert the normal
-        // into positive (explode) or negative (implode) value
-        value =
-            floatNormal >= lastFloat
-                ? (value = floatNormal * distance)
-                : distance * (distance * lastFloat * (floatNormal - lastFloat));
+        let value = absValue(distance, floatNormal);
 
-        // console.log(
-        //     padd(i),
-        //     padd(((distance * 1000) >> 0) / 1000),
-        //     padd(((lastFloat * 1000) >> 0) / 1000),
-        //     padd(((value * 1000) >> 0) / 1000),
-        //     padd(((floatNormal * 1000) >> 0) / 1000)
-        // );
-
-        lastFloat = floatNormal;
+        // lastFloat = floatNormal;
 
         setTimeout(() => mesh.translate(pos, value, Space.WORLD), i);
 
@@ -89,7 +77,3 @@ function rnd(max, min = 0, float = true) {
     const n = Math.random() * max + min;
     return float ? n : n >> 0;
 }
-
-// function padd(string, len = 8) {
-//     return String(` ${string}      `).slice(0, len);
-// }
