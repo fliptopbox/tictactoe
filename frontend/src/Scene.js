@@ -262,6 +262,8 @@ class Scene extends React.Component {
         return (
             <div className="ui-container">
                 <div className="ui">
+
+                    <div className="ui-cta-start"><span onClick={()=> window.camera.start(1200)} >START</span></div>
                     <div className="ui-terrain-count">{array && array.length}</div>
                     <div className="ui-terrain">{hexes}</div>
                 </div>

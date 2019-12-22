@@ -43,6 +43,13 @@
     font-size: 0.8em;
 }
 
+.ui-cta-start {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    padding: 5px;
+}
+
 .ui-terrain {
     flex: 1 0 auto;
     display: flex;
