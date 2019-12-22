@@ -9,18 +9,18 @@ function rnd(max = 1, min = 0, float = true) {
 
 export { timeline };
 function timeline(duration, fn, frameRate = 60) {
-    let percent;
     const seconds = duration / 1000;
     const frames = frameRate * seconds;
     const fps = 1000 / frameRate;
 
     for (let i = 0; i <= frames; i += 1) {
         setTimeout(function() {
-            percent = i / frames;
-            return !fn ? null : fn(percent, i);
+            return !fn ? null : fn(Number(i / frames), i);
         }, i * fps);
     }
 }
+
+
 
 const easingCurves = {
     ease: [0.25, 0.1, 0.25, 1],
