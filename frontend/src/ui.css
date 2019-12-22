@@ -48,6 +48,15 @@
     display: flex;
     justify-content: space-between;
 }
+.ui-terrain-count {
+    position: absolute;
+    right: 0;
+    bottom: 100%;
+    padding: 10px;
+}
+.ui-terrain-count::after {
+    content: "#";
+}
 
 .ui-player-current.ui-player {
     color: white;
