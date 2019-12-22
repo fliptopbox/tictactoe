@@ -19,6 +19,9 @@ import rotatePlane from './rotatePlane';
 import getScore from './calculateScore';
 import explodeMatrix from './explodeMatrix';
 import radialLineCluster from './radialLineCluster';
+import createCoreMesh from './createCoreMesh';
+import {rnd } from './utilities';
+import gameState from './gameState';
 
 import Player from './Player';
 import './ui.css';
@@ -40,7 +43,7 @@ class Scene extends React.Component {
                     playerId: '111',
                     twist: 0,
                     alias: '@black',
-                    spiecies: 0
+                    spiecies: 1
                 },
                 {
                     material: 'white',
@@ -58,8 +61,9 @@ class Scene extends React.Component {
                 }
             ],
             toggleOnDoubleTap: true,
-            radius: 0
+            radius: 2
         };
+
         this.toggleToNextPlayer.bind(this);
     }
 
@@ -221,6 +225,7 @@ class Scene extends React.Component {
         // this.camera = createCamera(e, (radius + 1) * 3.6);
         this.camera = createCamera(e);
         this.earth = getMatrix(e, radius);
+        this.generateScene = generateScene.bind(this);
 
         return generateScene.call(this);
     };
@@ -253,9 +258,11 @@ class Scene extends React.Component {
                       );
                   });
 
+        const array = !earth ? null : earth.filter(c => !c.owner && c.type);
         return (
             <div className="ui-container">
                 <div className="ui">
+                    <div className="ui-terrain-count">{array && array.length}</div>
                     <div className="ui-terrain">{hexes}</div>
                 </div>
                 <Canvas sceneDidMount={this.sceneDidMount} opts={opts} />;
@@ -269,7 +276,7 @@ export default Scene;
 function generateScene() {
     // const that = this;
     // const { scene, canvas, engine } = e;
-    const { scene, engine, earth, camera } = this;
+    let { scene, engine, earth, camera } = this;
     const { radius } = this.state;
 
     engine.runRenderLoop(() => scene && scene.render());
@@ -286,81 +293,23 @@ function generateScene() {
     createLight({ scene }, 'point', 'point1', 0.4, [0, 6, -1]);
     createLight({ scene }, 'point', 'core1', 1.4, [0, 0, 0]);
 
-    const god = earth[13].mesh;
-    god.billboardMode = Mesh.BILLBOARDMODE_ALL;
-    god.emissiveColor = new Color3(1, 0, 0);
-    god.visibility = 1;
-    god.alpha = 0.2;
-    new VolumetricLightScatteringPostProcess(
-        'godrays',
-        1.0,
-        camera,
-        god,
-        100,
-        Texture.BILINEAR_SAMPLINGMODE,
-        engine,
-        false
-    );
 
     scene.clearColor = new Color3(0.1, 0.1, 0.1);
     scene.onPointerObservable.add(pointerEvents.bind(this));
 
     // bump the state, to propogate the earth data
-    earth.filter(c => !c.core).forEach(cube => getTerrain(cube, { scene }, 0));
+    // earth = earth.filter(cube => cube.type);
+    earth = earth.filter(c => !c.core)
+        .forEach(cube => getTerrain(cube, { scene }, 0));
+
+    // delete all non-playable cubes
+    console.log(earth);
     this.setState({ ready: true });
 
     radialLineCluster(scene);
+    createCoreMesh({scene, engine, camera});
 
     window.earth = earth;
-    window.getGameState = object => getGameState.call(this, object);
-    window.setGameState = k => setGameState.call(this, k);
+    window.gameState = gameState(this);
 }
 
-function rnd(max, min = 0) {
-    return (Math.random() * max + min) >> 0;
-}
-
-function setGameState(key) {
-    // export state and matrix
-    let { state, earth } = this;
-    const matrix = [].concat(...earth).map(o => {
-        const shallow = {...o};
-        delete shallow.mesh;
-        return shallow;
-    });
-
-    const json = {
-        state,
-        matrix
-    };
-
-    localStorage[key] = JSON.stringify(json, null, 4);
-}
-
-function getGameState(object) {
-    if (typeof object === 'string') {
-        object = localStorage[object] || object;
-        object = JSON.parse(object);
-    }
-
-    const occupy = this.occupy.bind(this);
-    let { state, matrix } = object;
-
-    // merge the JSON data into the existing terrain data
-    // and render the updated cube
-    this.state = { ...this.state, ...state };
-
-    const emulate = {};
-    this.state.players.forEach(p => (emulate[p.playerId] = p));
-
-    matrix = matrix.filter(o => o.owner);
-    matrix.forEach(row => {
-        const { id, owner } = row;
-        this.earth[id] = {
-            ...this.earth[id],
-            ...row
-        };
-
-        occupy.call(this, `m${id}`, emulate[owner]);
-    }, this);
-}
