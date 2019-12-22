@@ -76,9 +76,9 @@ function updateCubePositions(array, matrix) {
         const { mesh } = cube;
 
         // the matrix attributes
-        x = Math.round(absolutePosition.x);
-        y = Math.round(absolutePosition.y);
-        z = Math.round(absolutePosition.z);
+        x = Math.round(absolutePosition.x * 2) / 2;
+        y = Math.round(absolutePosition.y * 2) / 2;
+        z = Math.round(absolutePosition.z * 2) / 2;
 
         // the mesh position
         mesh.parent = null; // mesh.setParent(null) !copies parent normals

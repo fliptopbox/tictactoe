@@ -139,7 +139,7 @@ function scoreCard(playerId, object) {
 
 function getRadiusFromMatix(matrix) {
     const radius = Math.max.apply(null, matrix.map(r => r.x));
-    return radius;
+    return Math.round(radius);
 }
 
 function getFilter(radius, type = 0, value = 0, negate = true) {
