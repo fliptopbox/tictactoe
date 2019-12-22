@@ -29,20 +29,20 @@ const matlib = {
         wireframe: true
     },
     red: {
-        diffuseColor: '#FF0000',
+        diffuseColor: '#ee0000',
         ambientColor: '#000011',
         emissiveColor: '#111111',
         textColor: '#000000',
         wireframe: false
     },
     black: {
-        diffuseColor: '#030303',
+        diffuseColor: '#121212',
         emissiveColor: '#000000',
         textColor: '#ffffff',
         wireframe: false
     },
     white: {
-        diffuseColor: '#EFEFEF',
+        diffuseColor: '#dfdfdf',
         textColor: '#000000',
         wireframe: false
     },

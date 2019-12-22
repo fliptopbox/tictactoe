@@ -9,24 +9,29 @@ export { getTerrain };
 
 let greens = [];
 let teals = [];
+let browns = [];
 
 // generate natural tints (light to dark)
 // i = 100 white, i = 0 black)
 for (let i = 65; i >= 25; i -= 5) {
-    let green, teal;
-    green = '#' + hsl.hex(120, 100, i);
-    teal = '#' + hsl.hex(204, 100, i);
+    let green, teal, brown;
+    green = '#' + hsl.hex(120, 45, i);
+    teal = '#' + hsl.hex(204, 60, i);
+    brown = '#' + hsl.hex(12, 40, i);
 
     greens.push(hexToRGB(green));
     teals.push(hexToRGB(teal));
+    browns.push(hexToRGB(brown));
 
     console.log(
-        '%c GREEN %c TEAL ',
+        '%c GREEN %c TEAL %c BROWN',
         `background: ${green}`,
         `background: ${teal}`,
+        `background: ${brown}`,
         i,
         green,
-        teal
+        teal,
+        brown, i - 25
     );
 }
 
@@ -107,7 +112,9 @@ function setTerrain(offset, x, y, z) {
 
 function getNaturalColor(type, axis = false) {
     // world central core
-    if (type === 0) return [1, 0, 0];
+    if (type === 0) {
+        return browns[(Math.random() * browns.length) >> 0];
+    }
 
     const natural = [...greens.slice(0, -2), ...teals.slice(0, -2)];
     const axises = [...greens.slice(-2), ...teals.slice(-2)];
@@ -117,7 +124,7 @@ function getNaturalColor(type, axis = false) {
 }
 
 function getDynamicTexture(scene, material, diffuseColor, text) {
-    const font = 'bold 20px Arial';
+    const font = 'bold 16px Arial';
     const color = "white";
     const dynTex = new DynamicTexture(
         'dtex',
