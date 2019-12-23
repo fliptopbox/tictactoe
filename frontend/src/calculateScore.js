@@ -20,7 +20,7 @@ function getFaceArray(dataset) {
 }
 
 function getOwner(cube) {
-    console.log(cube);
+    // console.log(cube);
     if(!cube || !cube.owner) return "";
     return cube.owner
 }

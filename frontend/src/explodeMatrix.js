@@ -25,7 +25,7 @@ function explodeMatrix(
 
             if (!displace) return;
 
-            console.log('displace', m.id, displace, duration, multiplier);
+            // console.log('displace', m.id, displace, duration, multiplier);
             animationStack(
                 scene,
                 m,

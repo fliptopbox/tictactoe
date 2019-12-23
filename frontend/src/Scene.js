@@ -58,7 +58,7 @@ class Scene extends React.Component {
                 }
             ],
             toggleOnDoubleTap: true,
-            radius: rnd(3,1, false)
+            radius: rnd(2,1, false)
         };
 
         console.log(this.state.radius)
@@ -68,26 +68,34 @@ class Scene extends React.Component {
     executeNonHumanPlayer = (player, ms = 0) => {
         // this.setState({ player });
 
-        const { earth, rotate, executeNonHumanPlayer, occupy } = this;
+        const { earth, rotate, radius, executeNonHumanPlayer, occupy } = this;
+        const diameter = radius + 2;
         const array = earth.filter(c => !c.owner && c.type);
-        const cube = array[(Math.random() * array.length) >> 0];
+        const cube = array[rnd(array.length - 1, 0, false)];
         const { players, playDelay } = this.state;
         const currentPlayer = players[player];
-        const twist = [1, 0, 0, 1, 0][(Math.random() * 5) >> 0];
-        const rotation = ['x', 'y', 'z'][rnd(2, 0)];
-        const size = [3, 5, 7, 9][this.radius];
-        const extent = rnd(size, 0) - ((size / 2) >> 0);
-        const amount = [1, 2, 3][rnd(2, 0)];
+        const twist = rnd(1,0, false);
+        const rotation = ['x', 'y', 'z'][rnd(2, 0, false)];
+        const extent = rnd(radius, -radius, false);
+        const amount = [1, 2, 3][rnd(2, 0, false)];
+        let totalDelay = 0;
+
+        if(currentPlayer.twist && twist) {
+            totalDelay = playDelay + ms;
+        } else {
+            totalDelay = 50;
+        }
 
         setTimeout(function() {
             if (currentPlayer.twist && twist) {
+                console.log("twisting", rotation, extent, amount);
                 rotate({ rotation, extent, amount });
                 executeNonHumanPlayer(player, ms + 150);
                 return;
             }
             // turn always ends with "occupy"
             occupy(cube.mesh.id);
-        }, playDelay + ms);
+        }, totalDelay);
     };
 
     rotate = ({ rotation, extent, amount }) => {
@@ -145,8 +153,8 @@ class Scene extends React.Component {
         const { playerId } = this.getCurrentPlayer();
         const score = getScore(earth, playerId);
         const array = earth.filter(c => !c.owner && c.type);
-        console.log('cubes free', array.length);
-        console.log(score);
+        // console.log('cubes free', array.length);
+        // console.log(score);
 
         if (score.finished) {
             console.log('game over');
