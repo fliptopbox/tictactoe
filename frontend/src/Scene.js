@@ -1,10 +1,7 @@
 import * as React from 'react';
 import {
-    Mesh,
     Color3,
     Vector3,
-    Texture,
-    VolumetricLightScatteringPostProcess
 } from 'babylonjs';
 import Canvas from './Canvas'; // import the component above linking to file we just created.
 
@@ -61,9 +58,10 @@ class Scene extends React.Component {
                 }
             ],
             toggleOnDoubleTap: true,
-            radius: 2
+            radius: rnd(3,1, false)
         };
 
+        console.log(this.state.radius)
         this.toggleToNextPlayer.bind(this);
     }
 
@@ -223,7 +221,7 @@ class Scene extends React.Component {
 
         const { radius } = this.state;
         // this.camera = createCamera(e, (radius + 1) * 3.6);
-        this.camera = createCamera(e);
+        this.camera = createCamera(e, radius);
         this.earth = getMatrix(e, radius);
         this.generateScene = generateScene.bind(this);
 

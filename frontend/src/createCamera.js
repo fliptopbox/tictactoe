@@ -1,10 +1,11 @@
 import { timeline } from "./utilities";
 import { Vector3, ArcRotateCamera } from "babylonjs";
-import orbitCamera from './orbitCamera';
+import orbitCamera from "./orbitCamera";
 
 export default createCamera;
-function createCamera({ scene, canvas }, radius = 1.276) {
-    var camera = new ArcRotateCamera(
+function createCamera({ scene, canvas }, matrixRadius = 1) {
+    const radius = matrixRadius * 1.2; // 1.276;
+    let camera = new ArcRotateCamera(
         "Camera",
         0.45539, // Math.PI / 2, // camera.alpha (horz)
         4.164, //Math.PI / 2, // camera.beta (vertical)
@@ -24,7 +25,7 @@ function createCamera({ scene, canvas }, radius = 1.276) {
         camera,
         start: (ms = 2000) => {
             if (orbit()) orbit(0);
-            start(camera, ms);
+            start(camera, ms, matrixRadius);
             camera.attachControl(canvas, true);
         },
         orbit,
@@ -33,20 +34,19 @@ function createCamera({ scene, canvas }, radius = 1.276) {
     return camera;
 }
 
-function start(camera, ms = 2000) {
-
-    const alphaStart = camera.alpha;
-    const betaStart = camera.beta;
-    const radiusStart = camera.radius;
-    const fovStart = camera.fov;
+function start(camera, ms = 2000, matrixRadius) {
+    const diameter = matrixRadius + 2;
+    const distance = diameter + (diameter / 2);
+    const { alpha, beta, radius, fov } = camera;
+    const end = { beta: 1, alpha: 7.2, radius: distance, fov: 1.5 };
 
     timeline(ms * 1.05, function(percent) {
-        camera.beta = betaStart + percent * 1.015;
-        camera.alpha = alphaStart + percent * 2.061;
+        camera.beta = beta + percent * (end.beta - beta);
+        camera.alpha = alpha + percent * (end.alpha - alpha);
     });
 
     timeline(ms, function(percent) {
-        camera.radius = radiusStart + percent * 3.1;
-        camera.fov = fovStart + percent * 1;
+        camera.radius = radius + percent * (end.radius - radius);
+        camera.fov = fov + percent * (end.fov - fov);
     });
 }
