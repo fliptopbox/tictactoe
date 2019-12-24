@@ -3,7 +3,8 @@ import { Vector3, ArcRotateCamera } from "babylonjs";
 import orbitCamera from "./orbitCamera";
 
 export default createCamera;
-function createCamera({ scene, canvas }, matrixRadius = 1) {
+function createCamera({ scene, canvas }, that) {
+    const matrixRadius = that.state.radius;
     const radius = matrixRadius * 1.2; // 1.276;
     let camera = new ArcRotateCamera(
         "Camera",
@@ -25,6 +26,7 @@ function createCamera({ scene, canvas }, matrixRadius = 1) {
         camera,
         start: (ms = 2000) => {
             if (orbit()) orbit(0);
+            that.setState({showIntro: false});
             start(camera, ms, matrixRadius);
             camera.attachControl(canvas, true);
         },

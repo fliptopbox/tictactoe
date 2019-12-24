@@ -10,7 +10,37 @@
     justify-content: center;
     margin: 1vh;
 }
+.ui-intro {
+    position: absolute;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    margin: -5vh -25% 0;
+    left: 50%;
+    text-align: center;
+    color: white;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+.ui-intro-instructions {
+    text-align: center;
+}
+.ui-intro-instructions h2,
+.ui-intro-instructions p {
+    margin: 0;
+    padding: 0;
+}
+.ui-intro-instructions h2 {
+    margin: 3vh 0 1vh;
+}
 
+.ui-intro-logo {
+    padding: 2vh;
+    text-align: center;
+    font-size: 10vw;
+    color: white;
+}
 .ui-player-color {
     width: 50px;
     height: 50px;

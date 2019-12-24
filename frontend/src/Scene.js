@@ -1,8 +1,5 @@
 import * as React from 'react';
-import {
-    Color3,
-    Vector3,
-} from 'babylonjs';
+import {Color3, Vector3} from 'babylonjs';
 import Canvas from './Canvas'; // import the component above linking to file we just created.
 
 import materials from './materials';
@@ -10,23 +7,26 @@ import createCamera from './createCamera';
 import createLight from './createLight';
 import getMatrix from './getMatrix';
 import showAxis from './showAxis';
-import { getTerrain } from './terrain';
+import {getTerrain} from './terrain';
 import pointerEvents from './pointerEvents';
 import rotatePlane from './rotatePlane';
 import getScore from './calculateScore';
 import explodeMatrix from './explodeMatrix';
 import radialLineCluster from './radialLineCluster';
 import createCoreMesh from './createCoreMesh';
-import {rnd } from './utilities';
+import {rnd} from './utilities';
 import gameState from './gameState';
 
+import Introduction from './Introduction';
 import Player from './Player';
+
 import './ui.css';
 
 class Scene extends React.Component {
     constructor() {
         super();
         this.state = {
+            showIntro: true, 
             playDelay: 550, // non-human turn delay
             rotationFrames: 50, // milseconds of animation
             focusOnOccupy: true, // move camera to occupaion cube
@@ -58,38 +58,40 @@ class Scene extends React.Component {
                 }
             ],
             toggleOnDoubleTap: true,
-            radius: rnd(2,1, false)
+            radius: rnd(2, 1, false)
         };
 
-        console.log(this.state.radius)
+        console.log(this.state.radius);
         this.toggleToNextPlayer.bind(this);
     }
 
     executeNonHumanPlayer = (player, ms = 0) => {
         // this.setState({ player });
 
-        const { earth, rotate, radius, executeNonHumanPlayer, occupy } = this;
+        const {earth, rotate, radius, executeNonHumanPlayer, occupy} = this;
         const diameter = radius + 2;
         const array = earth.filter(c => !c.owner && c.type);
         const cube = array[rnd(array.length - 1, 0, false)];
-        const { players, playDelay } = this.state;
+        const {players, playDelay} = this.state;
         const currentPlayer = players[player];
-        const twist = rnd(1,0, false);
+
+        // with the non-human occupy OR twist
+        // 33% chance of twist
+        const willTwist = currentPlayer.twist
+            ? rnd(9, 0, false) % 3 === 0
+            : false;
+
+        // potential rotation params
         const rotation = ['x', 'y', 'z'][rnd(2, 0, false)];
         const extent = rnd(radius, -radius, false);
-        const amount = [1, 2, 3][rnd(2, 0, false)];
-        let totalDelay = 0;
+        const amount = 1; // rnd(3, 1, false);
 
-        if(currentPlayer.twist && twist) {
-            totalDelay = playDelay + ms;
-        } else {
-            totalDelay = 50;
-        }
+        let totalDelay = willTwist ? playDelay + ms : 50;
 
         setTimeout(function() {
-            if (currentPlayer.twist && twist) {
-                console.log("twisting", rotation, extent, amount);
-                rotate({ rotation, extent, amount });
+            if (willTwist) {
+                console.log('twisting', rotation, extent, amount);
+                rotate({rotation, extent, amount});
                 executeNonHumanPlayer(player, ms + 150);
                 return;
             }
@@ -98,9 +100,9 @@ class Scene extends React.Component {
         }, totalDelay);
     };
 
-    rotate = ({ rotation, extent, amount }) => {
-        const { scene, earth } = this;
-        const { player, players, rotationFrames } = this.state;
+    rotate = ({rotation, extent, amount}) => {
+        const {scene, earth} = this;
+        const {player, players, rotationFrames} = this.state;
         const currentPlayer = players[player];
 
         if (!currentPlayer.twist) return;
@@ -117,8 +119,8 @@ class Scene extends React.Component {
     toggleToNextPlayer = () => {
         if (!this.state.toggleOnDoubleTap) return;
 
-        let { player, players, playDelay } = this.state;
-        const { executeNonHumanPlayer } = this;
+        let {player, players, playDelay} = this.state;
+        const {executeNonHumanPlayer} = this;
         player = (player + 1) % players.length;
         const nextPlayer = players[player];
         const bgcolor = nextPlayer.material;
@@ -130,7 +132,7 @@ class Scene extends React.Component {
             nextPlayer.spiecies
         );
 
-        this.setState({ player });
+        this.setState({player});
         if (nextPlayer.spiecies) {
             // delay to prevent multiple rotations
             return setTimeout(function() {
@@ -140,17 +142,17 @@ class Scene extends React.Component {
     };
 
     getCurrentPlayer() {
-        let { player, players } = this.state;
+        let {player, players} = this.state;
         return players[player];
     }
 
     updateScore() {
-        const { earth } = this;
-        const { finished } = this.state;
+        const {earth} = this;
+        const {finished} = this.state;
 
         if (!earth || finished) return null;
 
-        const { playerId } = this.getCurrentPlayer();
+        const {playerId} = this.getCurrentPlayer();
         const score = getScore(earth, playerId);
         const array = earth.filter(c => !c.owner && c.type);
         // console.log('cubes free', array.length);
@@ -158,7 +160,7 @@ class Scene extends React.Component {
 
         if (score.finished) {
             console.log('game over');
-            this.setState({ finished: true });
+            this.setState({finished: true});
         }
 
         return score;
@@ -189,8 +191,8 @@ class Scene extends React.Component {
         const m = materials(this);
         let currentPlayer = emulate === null ? players[player] : emulate;
         const playerMaterial = currentPlayer.material;
-        const { playerId } = currentPlayer;
-        const { x, y, z, axis } = cube;
+        const {playerId} = currentPlayer;
+        const {x, y, z, axis} = cube;
 
         cube.owner = currentPlayer.playerId;
 
@@ -215,10 +217,7 @@ class Scene extends React.Component {
         if (!score.finished) {
             this.toggleToNextPlayer();
         } else {
-            explodeMatrix(
-                { scene: this.scene, earth: this.earth },
-                score,
-            );
+            explodeMatrix({scene: this.scene, earth: this.earth}, score);
         }
     };
 
@@ -227,9 +226,9 @@ class Scene extends React.Component {
         this.canvas = e.canvas;
         this.engine = e.engine;
 
-        const { radius } = this.state;
+        const {radius} = this.state;
         // this.camera = createCamera(e, (radius + 1) * 3.6);
-        this.camera = createCamera(e, radius);
+        this.camera = createCamera(e, this );
         this.earth = getMatrix(e, radius);
         this.generateScene = generateScene.bind(this);
 
@@ -239,7 +238,7 @@ class Scene extends React.Component {
     getCurrentPlayerInfo() {
         // render all contestants
 
-        const { players, player } = this.state;
+        const {players, player} = this.state;
 
         return players.map((obj, n) => (
             <Player key={n} player={obj} current={n === player} />
@@ -248,14 +247,14 @@ class Scene extends React.Component {
 
     render() {
         const opts = {};
-        const { earth } = this;
+        const {earth} = this;
         const hexes = !earth
             ? null
             : earth
                   .filter(c => c.type)
                   .map((o, i) => {
-                      const { hexColor } = o.mesh.material;
-                      const bgcolor = { background: hexColor };
+                      const {hexColor} = o.mesh.material;
+                      const bgcolor = {background: hexColor};
                       return (
                           <span
                               className="swatch"
@@ -265,12 +264,20 @@ class Scene extends React.Component {
                   });
 
         const array = !earth ? null : earth.filter(c => !c.owner && c.type);
+        const showLogo = !this.state.showIntro ? null : <Introduction />;
+
         return (
             <div className="ui-container">
+                {showLogo}
                 <div className="ui">
-
-                    <div className="ui-cta-start"><span onClick={()=> window.camera.start(1200)} >START</span></div>
-                    <div className="ui-terrain-count">{array && array.length}</div>
+                    <div className="ui-cta-start">
+                        <span onClick={() => window.camera.start(1200)}>
+                            START
+                        </span>
+                    </div>
+                    <div className="ui-terrain-count">
+                        {array && array.length}
+                    </div>
                     <div className="ui-terrain">{hexes}</div>
                 </div>
                 <Canvas sceneDidMount={this.sceneDidMount} opts={opts} />;
@@ -284,35 +291,28 @@ export default Scene;
 function generateScene() {
     // const that = this;
     // const { scene, canvas, engine } = e;
-    let { scene, engine, earth, camera } = this;
-    const { radius } = this.state;
+    let {scene, engine, earth, camera} = this;
+    const {radius} = this.state;
 
     engine.runRenderLoop(() => scene && scene.render());
 
     showAxis((radius + 1) * 3, scene);
-    createLight(
-        { scene },
-        'hemi',
-        'sun',
-        0.25,
-        [0.6, 0.7, 0.7],
-        [0.5, 0.5, 0.5]
-    );
-    createLight({ scene }, 'point', 'point1', 0.4, [0, 6, -1]);
-    createLight({ scene }, 'point', 'core1', 1.4, [0, 0, 0]);
-
+    createLight({scene}, 'hemi', 'sun', 0.25, [0.6, 0.7, 0.7], [0.5, 0.5, 0.5]);
+    createLight({scene}, 'point', 'point1', 0.4, [0, 6, -1]);
+    createLight({scene}, 'point', 'core1', 1.4, [0, 0, 0]);
 
     scene.clearColor = new Color3(0.1, 0.1, 0.1);
     scene.onPointerObservable.add(pointerEvents.bind(this));
 
     // bump the state, to propogate the earth data
     // earth = earth.filter(cube => cube.type);
-    earth = earth.filter(c => !c.core)
-        .forEach(cube => getTerrain(cube, { scene }, 0));
+    earth = earth
+        .filter(c => !c.core)
+        .forEach(cube => getTerrain(cube, {scene}, 0));
 
     // delete all non-playable cubes
     console.log(earth);
-    this.setState({ ready: true });
+    this.setState({ready: true});
 
     radialLineCluster(scene);
     createCoreMesh({scene, engine, camera});
@@ -320,4 +320,3 @@ function generateScene() {
     window.earth = earth;
     window.gameState = gameState(this);
 }
-

@@ -1,9 +1,4 @@
-import {
-    StandardMaterial,
-    MeshBuilder,
-    Color3,
-    Vector3,
-} from 'babylonjs';
+import {StandardMaterial, MeshBuilder, Color3, Vector3} from 'babylonjs';
 
 // function padd(string, len = 8) {
 //     return String(` ${string}      `).slice(0, len);
@@ -12,22 +7,19 @@ import {
 
 export default radialLineCluster;
 function radialLineCluster(scene) {
-    const lines = lineArray();
-    const color = new Color3(0.07, 0.07, 0.07);
-    MeshBuilder.CreateLineSystem(
-        'linesystem',
-        { lines },
-        scene
-    ).color = color;
+    return pointCloud(scene);
+    // const lines = lineArray();
+    // const color = new Color3(0.07, 0.07, 0.07);
+    // MeshBuilder.CreateLineSystem('linesystem', {lines}, scene).color = color;
 
-    lines.forEach(l => pinHead(l[1], scene, color));
-    return lines;
+    // lines.forEach(l => pinHead(l[1], scene, color));
+    // return lines;
 }
 
 function pinHead(xyz, scene, color) {
     const m = MeshBuilder.CreateSphere(
         'dot',
-       { diameter: 0.11, segments: 4 },
+        {diameter: 0.11, segments: 4},
         scene
     );
     const mat = new StandardMaterial('drkgrey', scene);
@@ -59,7 +51,7 @@ function lineArray(n = 500) {
 }
 
 function getXYZ(min, max) {
-    const { PI, random, sin, cos } = Math;
+    const {PI, random, sin, cos} = Math;
     const long = random() * PI;
     const lat = random() * (PI * 2);
     return [
@@ -74,4 +66,21 @@ function getXYZ(min, max) {
             (min + max) * cos(long)
         ]
     ];
+}
+
+function pointCloud(scene) {
+    var sphere = MeshBuilder.CreateIcoSphere(
+        'sphere',
+        {radius: 10, segments: 128},
+        scene
+    );
+
+    let r, g, b;
+    r = g = b = 0.1050999;
+    var pointsMaterial = new StandardMaterial('Material', scene);
+    pointsMaterial.pointsCloud = true;
+    pointsMaterial.pointSize = 10;
+    pointsMaterial.diffuseColor = new Color3(r,g,b)
+    pointsMaterial.emissiveColor = new Color3(r,g,b)
+    sphere.material = pointsMaterial;
 }
