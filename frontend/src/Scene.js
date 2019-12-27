@@ -6,7 +6,7 @@ import materials from './materials';
 import createCamera from './createCamera';
 import createLight from './createLight';
 import getMatrix from './getMatrix';
-import showAxis from './showAxis';
+import showSceneAxis from './showAxis';
 import {getTerrain} from './terrain';
 import pointerEvents from './pointerEvents';
 import rotatePlane from './rotatePlane';
@@ -19,6 +19,7 @@ import gameState from './gameState';
 
 import Introduction from './Introduction';
 import Player from './Player';
+import Settings from './Settings';
 
 import './ui.css';
 
@@ -26,7 +27,9 @@ class Scene extends React.Component {
     constructor() {
         super();
         this.state = {
-            showIntro: true, 
+            showAxis: false,
+            showIntro: true,
+            showSettings: true,
             playDelay: 550, // non-human turn delay
             rotationFrames: 50, // milseconds of animation
             focusOnOccupy: true, // move camera to occupaion cube
@@ -34,6 +37,7 @@ class Scene extends React.Component {
             showCubeCoords: false,
             player: 0,
             finished: false,
+            // playerName: 'Bob Marley',
             players: [
                 {
                     material: 'black',
@@ -48,17 +52,10 @@ class Scene extends React.Component {
                     twist: 0,
                     alias: '@white',
                     spiecies: 1
-                },
-                {
-                    material: 'red',
-                    playerId: '333',
-                    twist: 0,
-                    alias: '@red',
-                    spiecies: 1
                 }
             ],
             toggleOnDoubleTap: true,
-            radius: rnd(2, 1, false)
+            radius: 1
         };
 
         console.log(this.state.radius);
@@ -128,6 +125,7 @@ class Scene extends React.Component {
         console.log(
             '%c%s',
             `background: ${bgcolor}; color: #666; padding: 3px;`,
+            nextPlayer.alias,
             nextPlayer.alias,
             nextPlayer.spiecies
         );
@@ -228,10 +226,11 @@ class Scene extends React.Component {
 
         const {radius} = this.state;
         // this.camera = createCamera(e, (radius + 1) * 3.6);
-        this.camera = createCamera(e, this );
+        this.camera = createCamera(e, this);
         this.earth = getMatrix(e, radius);
         this.generateScene = generateScene.bind(this);
 
+        window.earth = this.earth;
         return generateScene.call(this);
     };
 
@@ -245,9 +244,28 @@ class Scene extends React.Component {
         ));
     }
 
+    saveSettings = settings => {
+        console.log(settings);
+        const {radius, players} = settings;
+
+        this.setState({
+            radius,
+            players
+        });
+        this.saveAndStart();
+    };
+
+    updateEarth = radius => {
+        console.log('re-generate earth matrix', radius);
+        const scene = this.scene;
+        this.earth = getMatrix({scene}, radius);
+        window.earth = this.earth;
+    };
+
     render() {
         const opts = {};
         const {earth} = this;
+        const {showIntro, showSettings} = this.state;
         const hexes = !earth
             ? null
             : earth
@@ -264,16 +282,28 @@ class Scene extends React.Component {
                   });
 
         const array = !earth ? null : earth.filter(c => !c.owner && c.type);
-        const showLogo = !this.state.showIntro ? null : <Introduction />;
+        const showLogo = !showIntro ? null : <Introduction />;
+        const options = this.state;
+        const uiSettings = !showSettings ? null : (
+            <Settings
+                options={options}
+                saveSettings={this.saveSettings}
+                updateEarth={this.updateEarth}
+            />
+        );
+        const uiInfo = !(showSettings || showIntro) ? null : (
+            <div className="ui-intro">
+                {showLogo}
+                {uiSettings}
+            </div>
+        );
 
         return (
             <div className="ui-container">
-                {showLogo}
+                {uiInfo}
                 <div className="ui">
                     <div className="ui-cta-start">
-                        <span onClick={() => window.camera.start(1200)}>
-                            START
-                        </span>
+                        <span onClick={this.saveAndStart}>START</span>
                     </div>
                     <div className="ui-terrain-count">
                         {array && array.length}
@@ -284,6 +314,20 @@ class Scene extends React.Component {
             </div>
         );
     }
+
+    saveAndStart() {
+        this.setState({
+            showSettings: false,
+            showIntro: false
+        });
+        window.camera.start(1200);
+
+        const humans = this.state.players.reduce(
+            (a, c) => (a + c.spiecies === 0 ? 1 : 0),
+            0
+        );
+        if (!humans) this.executeNonHumanPlayer(0);
+    }
 }
 
 export default Scene;
@@ -292,11 +336,11 @@ function generateScene() {
     // const that = this;
     // const { scene, canvas, engine } = e;
     let {scene, engine, earth, camera} = this;
-    const {radius} = this.state;
+    const {radius, showAxis} = this.state;
 
     engine.runRenderLoop(() => scene && scene.render());
 
-    showAxis((radius + 1) * 3, scene);
+    showSceneAxis((radius + 1) * 3, scene, showAxis);
     createLight({scene}, 'hemi', 'sun', 0.25, [0.6, 0.7, 0.7], [0.5, 0.5, 0.5]);
     createLight({scene}, 'point', 'point1', 0.4, [0, 6, -1]);
     createLight({scene}, 'point', 'core1', 1.4, [0, 0, 0]);
@@ -304,19 +348,10 @@ function generateScene() {
     scene.clearColor = new Color3(0.1, 0.1, 0.1);
     scene.onPointerObservable.add(pointerEvents.bind(this));
 
-    // bump the state, to propogate the earth data
-    // earth = earth.filter(cube => cube.type);
-    earth = earth
-        .filter(c => !c.core)
-        .forEach(cube => getTerrain(cube, {scene}, 0));
-
-    // delete all non-playable cubes
-    console.log(earth);
     this.setState({ready: true});
 
     radialLineCluster(scene);
     createCoreMesh({scene, engine, camera});
 
-    window.earth = earth;
     window.gameState = gameState(this);
 }

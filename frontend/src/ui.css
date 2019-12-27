@@ -31,6 +31,33 @@
     margin: 0;
     padding: 0;
 }
+.ui-settings ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+}
+.ui-settings-range {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+}
+
+
+.ui-input-text,
+.ui-input-label {
+    flex: 0 1 auto;
+    width: 8vw;
+}
+
+
+.ui-input-range {
+    flex: 2 1 auto;
+}
+
+
+
+
 .ui-intro-instructions h2 {
     margin: 3vh 0 1vh;
 }

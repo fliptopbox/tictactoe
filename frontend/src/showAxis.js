@@ -7,7 +7,8 @@ import {
 } from 'babylonjs';
 
 export default showAxis;
-function showAxis(size, scene) {
+function showAxis(size, scene, showAxis = false) {
+    if(!showAxis) return;
     var axisX = Mesh.CreateLines(
         'axisX',
         [

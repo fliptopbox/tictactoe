@@ -3,7 +3,7 @@ import * as React from 'react';
 export default Introduction;
 function Introduction() {
     return (
-        <div className="ui-intro">
+        <div>
             <div className="ui-intro-logo">fliptopbox</div>
             <div className="ui-intro-instructions">
                 <p>Familiar lattice game in 3D</p>

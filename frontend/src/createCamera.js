@@ -15,6 +15,8 @@ function createCamera({ scene, canvas }, that) {
         scene
     );
 
+    
+
     camera.fov = 1.2;
     camera.setTarget(new Vector3(0, -1, 0));
     // camera.attachControl(canvas, true);
@@ -22,12 +24,14 @@ function createCamera({ scene, canvas }, that) {
     const orbit = orbitCamera(camera);
     orbit(1);
 
+
+
     window.camera = {
         camera,
         start: (ms = 2000) => {
             if (orbit()) orbit(0);
             that.setState({showIntro: false});
-            start(camera, ms, matrixRadius);
+            start(camera, ms, that.state.radius);
             camera.attachControl(canvas, true);
         },
         orbit,
@@ -35,6 +39,7 @@ function createCamera({ scene, canvas }, that) {
     };
     return camera;
 }
+
 
 function start(camera, ms = 2000, matrixRadius) {
     const diameter = matrixRadius + 2;

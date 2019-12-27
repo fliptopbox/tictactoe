@@ -46,6 +46,11 @@ const matlib = {
         textColor: '#000000',
         wireframe: false
     },
+    grey: {
+        diffuseColor: '#7c7c7c',
+        textColor: '#000000',
+        wireframe: false
+    },
     surface: {
         diffuseColor: new Color3(0, 0, 0),
         // specularColor: new Color3(0, 0, 0),
