@@ -10,53 +10,72 @@
     justify-content: center;
     margin: 1vh;
 }
+
+.ui-branding {
+    position: fixed;
+    top: 0;
+    right: 0;
+    color: white;
+    padding: 6px 10px;
+    font-weight: bold;
+    background: black;
+    transform: rotate(90deg) translate(42px, -30px);
+}
+
 .ui-intro {
     position: absolute;
     top: 0;
-    width: 50%;
     height: 100%;
-    margin: -5vh -25% 0;
-    left: 50%;
+    margin: auto;
+    left: 0;
     text-align: center;
     color: white;
     display: flex;
     justify-content: center;
     flex-direction: column;
+    right: 0;
+    max-width: 600px;
+    width: 90%;
 }
+
 .ui-intro-instructions {
     text-align: center;
 }
+
 .ui-intro-instructions h2,
 .ui-intro-instructions p {
     margin: 0;
     padding: 0;
 }
+
 .ui-settings ul {
     list-style: none;
     margin: 0;
     padding: 0;
     text-align: left;
 }
+
 .ui-settings-range {
     width: 100%;
-    display: flex;
+    /*     display: flex; */
     justify-content: flex-start;
 }
 
+.ui-input-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 1vh 0;
+}
 
 .ui-input-text,
 .ui-input-label {
     flex: 0 1 auto;
-    width: 8vw;
+    /*     width: 8vw; */
 }
-
 
 .ui-input-range {
-    flex: 2 1 auto;
+    width: 100%;
 }
-
-
-
 
 .ui-intro-instructions h2 {
     margin: 3vh 0 1vh;
@@ -68,6 +87,44 @@
     font-size: 10vw;
     color: white;
 }
+
+.ui-players {
+    flex: 1 0 auto;
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    margin: 2vh 0;
+}
+
+.ui-player {
+    display: block;
+    flex: 1 0 auto;
+    color: black;
+    font-size: 0.8em;
+    margin: 14px;
+}
+
+.ui-player-card {
+    padding: 1vh;
+    flex: 1 0 auto;
+    text-align: left;
+    color: #bababa;
+    width: 20%;
+}
+
+.ui-player-card textarea {
+    font-family: inherit;
+    background: transparent;
+    border: none;
+    color: inherit;
+    min-height: 3vh;
+    font-size: 2vh;
+    overflow: hidden;
+    margin-bottom: 1vh;
+    width: 100%;
+}
+
 .ui-player-color {
     width: 50px;
     height: 50px;
@@ -83,21 +140,12 @@
     margin: 10px;
     display: block;
 }
+
 .swatch {
     flex: 1 0 auto;
     display: block;
     height: 10px;
     margin: 0;
-}
-.ui-players {
-    flex: 1 0 auto;
-    display: flex;
-    width: 0%;
-}
-.ui-player {
-    flex: 1 0 auto;
-    color: black;
-    font-size: 0.8em;
 }
 
 .ui-cta-start {
@@ -107,19 +155,90 @@
     padding: 5px;
 }
 
+.ui-icon {
+    display: inline-block;
+    height: 1em;
+    margin: 0 0 1px 0;
+    vertical-align: text-bottom;
+}
+
+/* game over *****************/
+
+/* .ui-game-over { */
+/*     font-size: 14px; */
+/* } */
+
+.ui-game-over-stats {
+    display: flex;
+    background: rgba(0, 0, 0, 0.5);
+    color: #333333;
+    width: 100%;
+    padding: 2vh;
+    text-align: center;
+    justify-content: center;
+    margin: 0.8vh 0;
+}
+.ui-score-row {
+    margin: 0 0.3em;
+}
+.ui-score-points {
+    color: white;
+}
+
+.ui-subheading {
+    color: white;
+    padding: 0 1em;
+}
+
+.ui-score-avatar {
+    display: none;
+}
+
+.ui-score-col {
+    padding: 0 0.3em 0;
+}
+/* status *********************/
+
+.ui-status {
+    /* font-size: 24px; */
+    font-size: 2.5vh;
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.ui-status-cell {
+    padding: 10px;
+    flex: 1 0 auto;
+    text-align: right;
+}
+.ui-status-cell.ui-current {
+    flex: 6 0 auto;
+    text-align: left;
+    display: flex;
+}
+.ui-current-avatar {
+    width: 1em;
+    height: 1em;
+    border-radius: 3em;
+    background: #cccccc;
+    margin: auto 0.5em auto 0;
+    display: block;
+    border: 2px solid #cfcfcf;
+}
+
+.ui-terrain-count::after {
+    content: '#';
+}
+
 .ui-terrain {
     flex: 1 0 auto;
     display: flex;
     justify-content: space-between;
-}
-.ui-terrain-count {
-    position: absolute;
-    right: 0;
-    bottom: 100%;
-    padding: 10px;
-}
-.ui-terrain-count::after {
-    content: "#";
 }
 
 .ui-player-current.ui-player {

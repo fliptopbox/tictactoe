@@ -110,6 +110,7 @@ function createPivot(scene) {
     const mat = new StandardMaterial('origin', scene);
     mat.wireframe = true;
     pivot.material = mat;
+    pivot.visibility = false;
     pivot.position = origin;
     return pivot;
 }

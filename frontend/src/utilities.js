@@ -1,5 +1,10 @@
 import BezierEasing from 'bezier-easing';
 
+export { padd };
+ function padd(string, len = 8) {
+     return String(` ${string}      `).slice(0, len);
+ }
+
 export { rnd };
 function rnd(max = 1, min = 0, float = true) {
     let n = Math.random() * (max - min) + min;
@@ -19,8 +24,6 @@ function timeline(duration, fn, frameRate = 60) {
         }, i * fps);
     }
 }
-
-
 
 const easingCurves = {
     ease: [0.25, 0.1, 0.25, 1],
