@@ -185,9 +185,13 @@ function PlayerName({ alias, spiecies, material, handler }) {
     );
 }
 
+let serialno = 0;
 function getNextMaterial() {
-    let color = materialKeys.splice(0, 1);
-    return color[0];
+    let n = materialKeys.length;
+    // let color = materialKeys.splice(0, 1);
+    let color = materialKeys[serialno % n];
+    serialno += 1;
+    return color;
 }
 
 function createPlayer(alias, human) {

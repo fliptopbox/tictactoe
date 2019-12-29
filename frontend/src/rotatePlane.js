@@ -26,6 +26,8 @@ function rotatePlane(
     const duration = (rotationFrames * speed) >> 0;
     const pivot = createPivot(scene);
 
+    // console.log("extent", extent);
+
     let collection = matrix.filter(cube => {
         const child = cube[axis] === extent;
         if (child) cube.mesh.setParent(pivot);

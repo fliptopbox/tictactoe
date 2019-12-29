@@ -65,11 +65,11 @@ class Scene extends React.Component {
     executeNonHumanPlayer = (player, ms = 0) => {
         // this.setState({ player });
 
-        const { earth, rotate, radius, executeNonHumanPlayer, occupy } = this;
+        const { earth, rotate, executeNonHumanPlayer, occupy } = this;
         // const diameter = radius + 2;
         const array = earth.filter(c => !c.owner && c.type);
         const cube = array[rnd(array.length - 1, 0, false)];
-        const { players, playDelay } = this.state;
+        const { players, playDelay, radius } = this.state;
         const currentPlayer = players[player];
 
         // with the non-human occupy OR twist
@@ -80,18 +80,19 @@ class Scene extends React.Component {
 
         // potential rotation params
         const rotation = ['x', 'y', 'z'][rnd(2, 0, false)];
-        const extent = rnd(radius, -radius, false);
-        const amount = 1; // rnd(3, 1, false);
+        const extent = Math.round((rnd(radius * 2, 0) - radius) * 2) / 2;
+        const amount = [-1, 1][rnd(1,0, false)];
 
         let totalDelay = willTwist ? playDelay + ms : 50;
 
         setTimeout(function() {
             if (willTwist) {
-                console.log('twisting', rotation, extent, amount);
+                console.log('>>>>> twisting', rotation, extent, amount);
                 rotate({ rotation, extent, amount });
                 executeNonHumanPlayer(player, ms + 150);
                 return;
             }
+
             // turn always ends with "occupy"
             occupy(cube.mesh.id);
         }, totalDelay);
@@ -265,7 +266,13 @@ class Scene extends React.Component {
             radius,
             players
         });
-        this.saveAndStart();
+        // warning setState is VERY slow...
+        // the new state.players is not set fast enough
+        // for the game start ??????
+
+        console.log(settings)
+
+        this.saveAndStart(players, radius);
     };
 
     updateEarth = radius => {
@@ -334,17 +341,21 @@ class Scene extends React.Component {
         );
     }
 
-    saveAndStart() {
+    saveAndStart(players, radius) {
         this.setState({
             showSettings: false,
-            showIntro: false
+            showIntro: false, 
+            radius, 
+            players
         });
+
         window.camera.start(1200);
 
-        const humans = this.state.players.reduce(
-            (a, c) => (a + c.spiecies === 0 ? 1 : 0),
+        const humans = players.reduce(
+            (a, c) => (a + (c.spiecies === 0 ? 1 : 0)),
             0
         );
+
         if (!humans) this.executeNonHumanPlayer(0);
     }
 }
