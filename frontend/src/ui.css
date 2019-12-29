@@ -3,12 +3,13 @@
     bottom: 0;
     right: 0;
     left: 0;
+    height: 100%;
     z-index: 1;
     font-size: 2em;
     color: white;
     display: flex;
     justify-content: center;
-    margin: 1vh;
+    margin: auto;
 }
 
 .ui-branding {
@@ -42,8 +43,7 @@
     text-align: center;
 }
 
-.ui-intro-instructions h2,
-.ui-intro-instructions p {
+.ui-intro-instructions h2, .ui-intro-instructions p {
     margin: 0;
     padding: 0;
 }
@@ -67,8 +67,7 @@
     margin: 1vh 0;
 }
 
-.ui-input-text,
-.ui-input-label {
+.ui-input-text, .ui-input-label {
     flex: 0 1 auto;
     /*     width: 8vw; */
 }
@@ -164,10 +163,6 @@
 
 /* game over *****************/
 
-/* .ui-game-over { */
-/*     font-size: 14px; */
-/* } */
-
 .ui-game-over-stats {
     display: flex;
     background: rgba(0, 0, 0, 0.5);
@@ -178,9 +173,11 @@
     justify-content: center;
     margin: 0.8vh 0;
 }
+
 .ui-score-row {
     margin: 0 0.3em;
 }
+
 .ui-score-points {
     color: white;
 }
@@ -197,18 +194,20 @@
 .ui-score-col {
     padding: 0 0.3em 0;
 }
-/* status *********************/
 
+/* status *********************/
 .ui-status {
-    /* font-size: 24px; */
-    font-size: 2.5vh;
     position: absolute;
-    bottom: 100%;
+    bottom: 0;
     left: 0;
     right: 0;
+    margin: 0.5vh;
+    padding: 0;
+}
+
+.ui-status-icons {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
+    flex: 1 0 auto;
 }
 
 .ui-status-cell {
@@ -216,11 +215,18 @@
     flex: 1 0 auto;
     text-align: right;
 }
+
+.ui-status-game-over, .ui-status-current-player {
+    display: flex;
+    color: white;
+}
+
 .ui-status-cell.ui-current {
     flex: 6 0 auto;
     text-align: left;
     display: flex;
 }
+
 .ui-current-avatar {
     width: 1em;
     height: 1em;
@@ -236,9 +242,7 @@
 }
 
 .ui-terrain {
-    flex: 1 0 auto;
     display: flex;
-    justify-content: space-between;
 }
 
 .ui-player-current.ui-player {
@@ -258,4 +262,11 @@
 
 .ui-player-spiecies {
     font-size: 15px;
+}
+
+.ui-settings {
+    width: 50%;
+    display: block;
+    margin: auto;
+    max-width: 600px;
 }

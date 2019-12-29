@@ -1,8 +1,8 @@
 import * as React from 'react';
-import {Color3, Vector3} from 'babylonjs';
+import { Color3, Vector3 } from 'babylonjs';
 import Canvas from './Canvas';
 
-import {rnd} from './utilities';
+import { rnd } from './utilities';
 import materials from './materials';
 import createCamera from './createCamera';
 import createLight from './createLight';
@@ -17,9 +17,9 @@ import createCoreMesh from './createCoreMesh';
 import gameState from './gameState';
 import getRandomRotation from './getRandomRotation';
 
-import Introduction from './Introduction';
 import Player from './Player';
 import Settings from './Settings';
+import Status from './Status';
 
 import './ui.css';
 
@@ -71,11 +71,11 @@ class Scene extends React.Component {
     executeNonHumanPlayer = (player, ms = 0) => {
         // this.setState({ player });
 
-        const {earth, rotate, executeNonHumanPlayer, occupy} = this;
+        const { earth, rotate, executeNonHumanPlayer, occupy } = this;
         // const diameter = radius + 2;
         const array = earth.filter(c => !c.owner && c.type);
         const cube = array[rnd(array.length - 1, 0, false)];
-        const {players, playDelay, radius} = this.state;
+        const { players, playDelay, radius } = this.state;
         const currentPlayer = players[player];
 
         // with the non-human occupy OR twist 33% chance of twist
@@ -97,9 +97,9 @@ class Scene extends React.Component {
         }, totalDelay);
     };
 
-    rotate = ({rotation, extent, amount}) => {
-        const {scene, earth} = this;
-        const {player, players, rotationFrames} = this.state;
+    rotate = ({ rotation, extent, amount }) => {
+        const { scene, earth } = this;
+        const { player, players, rotationFrames } = this.state;
         const currentPlayer = players[player];
 
         if (!currentPlayer.twist) return;
@@ -116,8 +116,8 @@ class Scene extends React.Component {
     toggleToNextPlayer = () => {
         if (!this.state.toggleOnDoubleTap) return;
 
-        let {player, players, playDelay} = this.state;
-        const {executeNonHumanPlayer} = this;
+        let { player, players, playDelay } = this.state;
+        const { executeNonHumanPlayer } = this;
         player = (player + 1) % players.length;
         const nextPlayer = players[player];
         const bgcolor = nextPlayer.material;
@@ -130,7 +130,7 @@ class Scene extends React.Component {
             nextPlayer.spiecies
         );
 
-        this.setState({player});
+        this.setState({ player });
         if (nextPlayer.spiecies) {
             // delay to prevent multiple rotations
             return setTimeout(function() {
@@ -140,17 +140,17 @@ class Scene extends React.Component {
     };
 
     getCurrentPlayer() {
-        let {player, players} = this.state;
+        let { player, players } = this.state;
         return players[player];
     }
 
     updateScore() {
-        const {earth} = this;
-        let {finished, players} = this.state;
+        const { earth } = this;
+        let { finished, players } = this.state;
 
         if (!earth || finished) return null;
 
-        const {playerId} = this.getCurrentPlayer();
+        const { playerId } = this.getCurrentPlayer();
         const score = getScore(earth, playerId);
 
         score.rank.forEach(item => {
@@ -166,16 +166,22 @@ class Scene extends React.Component {
         });
 
         finished = score.finished === true;
-        this.setState({players, finished});
+        this.setState({ players, finished });
         return score;
     }
 
     gameOver = () => {
-        const ordered = this.state.players.sort(
+        const rank = this.state.players.sort(
             (a, b) => b.accumulated - a.accumulated
         );
 
-        return ordered;
+        // is this s tied games?
+        const topscore = rank[0].accumulated;
+        const count = rank.filter(p => p.accumulated === topscore).length;
+
+        console.log('winners', topscore, count);
+
+        return { count, rank };
     };
 
     occupy = (id, emulate = null) => {
@@ -203,8 +209,8 @@ class Scene extends React.Component {
         const m = materials(this);
         let currentPlayer = emulate === null ? players[player] : emulate;
         const playerMaterial = currentPlayer.material;
-        const {playerId} = currentPlayer;
-        const {x, y, z, axis} = cube;
+        const { playerId } = currentPlayer;
+        const { x, y, z, axis } = cube;
         const scaleUpBy = 1.165; // upsize cube
 
         cube.owner = currentPlayer.playerId;
@@ -229,7 +235,7 @@ class Scene extends React.Component {
         if (!score.finished) {
             this.toggleToNextPlayer();
         } else {
-            explodeMatrix({scene: this.scene, earth: this.earth}, score);
+            explodeMatrix({ scene: this.scene, earth: this.earth }, score);
         }
     };
 
@@ -238,7 +244,7 @@ class Scene extends React.Component {
         this.canvas = e.canvas;
         this.engine = e.engine;
 
-        const {radius} = this.state;
+        const { radius } = this.state;
         // this.camera = createCamera(e, (radius + 1) * 3.6);
         this.camera = createCamera(e, this);
         this.earth = getMatrix(e, radius);
@@ -251,7 +257,7 @@ class Scene extends React.Component {
     getCurrentPlayerInfo() {
         // render all contestants
 
-        const {players, player} = this.state;
+        const { players, player } = this.state;
 
         return players.map((obj, n) => (
             <Player key={n} player={obj} current={n === player} />
@@ -259,11 +265,12 @@ class Scene extends React.Component {
     }
 
     saveSettings = settings => {
-        const {radius, players} = settings;
+        const { radius, players } = settings;
 
         this.setState({
             radius,
-            players
+            players,
+            inProgress: true
         });
         // warning setState is VERY slow...
         // the new state.players is not set fast enough
@@ -277,64 +284,29 @@ class Scene extends React.Component {
     updateEarth = radius => {
         console.log('re-generate earth matrix', radius);
         const scene = this.scene;
-        this.earth = getMatrix({scene}, radius);
+        this.earth = getMatrix({ scene }, radius);
         window.earth = this.earth;
     };
 
     render() {
         const opts = {};
-        const {earth} = this;
-        const {showIntro, showSettings, finished} = this.state;
-        const hexes = !earth
-            ? null
-            : earth
-                  .filter(c => c.type)
-                  .map((o, i) => {
-                      const {hexColor} = o.mesh.material;
-                      const bgcolor = {background: hexColor};
-                      return (
-                          <span
-                              className="swatch"
-                              key={'hx' + i}
-                              style={bgcolor}></span>
-                      );
-                  });
-
-        const array = !earth ? null : earth.filter(c => !c.owner && c.type);
-        const showLogo = !showIntro ? null : <Introduction />;
-        const options = this.state;
-        const uiSettings = !showSettings ? null : (
-            <Settings
-                options={options}
-                saveSettings={this.saveSettings}
-                updateEarth={this.updateEarth}
-            />
-        );
-        let uiInfo = !(showSettings || showIntro) ? null : (
-            <div className="ui-intro">
-                {showLogo}
-                {uiSettings}
-            </div>
-        );
-
+        const { earth, state } = this;
+        const { finished } = this.state;
         const gameover = !finished ? null : this.gameOver();
-        let status = <CurrentPlayer state={this.state} array={array} />;
-        if (gameover) {
-            status = (
-                <div className="ui-status ui-game-over">
-                    <GameOver stats={gameover} />
-                </div>
-            );
-        }
 
         return (
             <div className="ui-container">
                 <div className="ui-branding">FLIPTOPBOX</div>
-                {uiInfo}
-                <div className="ui">
-                    {status}
-                    <div className="ui-terrain">{hexes}</div>
-                </div>
+                <Status
+                    state={state}
+                    gameover={gameover}
+                    earth={earth}
+                />
+                <Settings
+                    state={state}
+                    saveSettings={this.saveSettings}
+                    updateEarth={this.updateEarth}
+                />
                 <Canvas sceneDidMount={this.sceneDidMount} opts={opts} />;
             </div>
         );
@@ -344,6 +316,7 @@ class Scene extends React.Component {
         this.setState({
             showSettings: false,
             showIntro: false,
+            inProgress: true,
             radius,
             players
         });
@@ -364,90 +337,30 @@ export default Scene;
 function generateScene() {
     // const that = this;
     // const { scene, canvas, engine } = e;
-    let {scene, engine, camera, earth} = this;
-    const {radius, showAxis} = this.state;
+    let { scene, engine, camera, earth } = this;
+    const { radius, showAxis } = this.state;
 
     engine.runRenderLoop(() => scene && scene.render());
 
     showSceneAxis((radius + 1) * 3, scene, showAxis);
-    createLight({scene}, 'hemi', 'sun', 0.25, [0.6, 0.7, 0.7], [0.5, 0.5, 0.5]);
-    createLight({scene}, 'point', 'point1', 0.4, [0, 6, -1]);
-    createLight({scene}, 'point', 'core1', 1.4, [0, 0, 0]);
+    createLight(
+        { scene },
+        'hemi',
+        'sun',
+        0.25,
+        [0.6, 0.7, 0.7],
+        [0.5, 0.5, 0.5]
+    );
+    createLight({ scene }, 'point', 'point1', 0.4, [0, 6, -1]);
+    createLight({ scene }, 'point', 'core1', 1.4, [0, 0, 0]);
 
     scene.clearColor = new Color3(0.1, 0.1, 0.1);
     scene.onPointerObservable.add(pointerEvents.bind(this));
 
-    this.setState({ready: true});
+    this.setState({ ready: true });
 
     radialLineCluster(scene);
-    createCoreMesh({scene, engine, camera, earth});
+    createCoreMesh({ scene, engine, camera, earth });
 
     window.gameState = gameState(this);
-}
-
-function CurrentPlayer({state, array}) {
-    const {player, players} = state;
-    const current = players[player];
-    const {alias, twist, material} = current;
-
-    return (
-        <div className="ui-status">
-            <div className="ui-status-cell ui-current">
-                <div
-                    className="ui-current-avatar"
-                    style={{background: material}}></div>
-                <div className="ui-current-player">{alias}</div>
-            </div>
-
-            <div className="ui-status-cell">
-                {twist}{' '}
-                <img
-                    className="ui-icon"
-                    src="/images/icons/twists.svg"
-                    alt="twist"
-                />
-            </div>
-            <div className="ui-status-cell">
-                {current.accumulated || 0}{' '}
-                <img
-                    className="ui-icon"
-                    src="/images/icons/score.svg"
-                    alt="score"
-                />
-            </div>
-            <div className="ui-status-cell">
-                {array && array.length}{' '}
-                <img
-                    className="ui-icon"
-                    src="/images/icons/square.svg"
-                    alt="free squares"
-                />
-            </div>
-        </div>
-    );
-}
-
-function GameOver({stats}) {
-    const scoreCard = stats.map(item => {
-        const {alias, accumulated, material, playerId} = item;
-        return (
-            <div key={playerId} className="ui-score-row">
-                <span className="ui-score-col ui-score-avatar">{material}</span>
-                <span className="ui-score-col ui-score-alias">{alias}</span>
-                <span className="ui-score-col ui-score-points">
-                    {accumulated}
-                </span>
-            </div>
-        );
-    });
-
-    const {alias} = stats[0];
-
-    return (
-        <div className="ui-game-over-stats">
-            <div className="ui-heading">Game Over</div>
-            <div className="ui-subheading">{alias} wins!</div>
-            {scoreCard}
-        </div>
-    );
 }

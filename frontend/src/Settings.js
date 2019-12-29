@@ -6,10 +6,12 @@ import { rnd } from './utilities';
 const materialKeys = ['black', 'white', 'red', 'grey'];
 
 class Settings extends React.Component {
-    constructor({ options, saveSettings }) {
+    constructor({ state, saveSettings }) {
         super();
 
-        let state = {
+        console.log('>>>>', state);
+
+        this.state = {
             radius: 1,
             opponents: 2,
             nonhuman: 1,
@@ -17,17 +19,15 @@ class Settings extends React.Component {
             players: null
         };
 
-        state.max = state.opponents;
-        state.players = [0, 1, 2, 3].map(n => {
+        this.state.max = this.state.opponents;
+        this.state.players = [0, 1, 2, 3].map(n => {
             let ishuman =
-                state.opponents > state.nonhuman &&
-                state.opponents - state.nonhuman - n > 0
+                this.state.opponents > this.state.nonhuman &&
+                this.state.opponents - this.state.nonhuman - n > 0
                     ? 0
                     : 1;
             return createPlayer(null, ishuman === 0);
         });
-
-        this.state = state;
     }
 
     handleSave = () => {
@@ -79,6 +79,8 @@ class Settings extends React.Component {
     };
 
     render() {
+        if (!this.props.state.showSettings) return null;
+
         const { radius } = this.state;
         const text = `${radius + 2}x${radius + 2}`;
         const playerslist = this.state.players.map((user, i) => {
@@ -100,37 +102,39 @@ class Settings extends React.Component {
         }, this);
 
         return (
-            <div className="ui-settings">
-                <h2>Game settings</h2>
-                <Range
-                    key="radius"
-                    min="1"
-                    max="4"
-                    label="Matrix size"
-                    value={this.state.radius}
-                    text={text}
-                    handler={this.handleRadius}
-                    handleChange={this.handleRadiusChange}
-                />
-                <Range
-                    key="opponents"
-                    min="2"
-                    max="4"
-                    label="Opponents"
-                    value={this.state.opponents}
-                    handler={this.handlePlayers}
-                />
-                <Range
-                    key="nonhuman"
-                    min="0"
-                    max={this.state.max}
-                    label="Non-human"
-                    value={this.state.nonhuman}
-                    handler={this.handleNons}
-                />
-                <div className="ui-players">{playerslist}</div>
-                <div className="ui-cta-save" onClick={this.handleSave}>
-                    SAVE
+            <div className="ui">
+                <div className="ui-settings">
+                    <h2>Game settings</h2>
+                    <Range
+                        key="radius"
+                        min="1"
+                        max="4"
+                        label="Matrix size"
+                        value={this.state.radius}
+                        text={text}
+                        handler={this.handleRadius}
+                        handleChange={this.handleRadiusChange}
+                    />
+                    <Range
+                        key="opponents"
+                        min="2"
+                        max="4"
+                        label="Opponents"
+                        value={this.state.opponents}
+                        handler={this.handlePlayers}
+                    />
+                    <Range
+                        key="nonhuman"
+                        min="0"
+                        max={this.state.max}
+                        label="Non-human"
+                        value={this.state.nonhuman}
+                        handler={this.handleNons}
+                    />
+                    <div className="ui-players">{playerslist}</div>
+                    <div className="ui-cta-save" onClick={this.handleSave}>
+                        SAVE
+                    </div>
                 </div>
             </div>
         );
@@ -200,7 +204,7 @@ function createPlayer(alias, human) {
 
     // splice to ensure names are unique.
     const n = antagonist.length - 1;
-    alias = alias || antagonist.splice(rnd(n, 0, false) ,1);
+    alias = alias || antagonist.splice(rnd(n, 0, false), 1);
 
     return {
         material,
