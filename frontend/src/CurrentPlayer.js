@@ -11,11 +11,13 @@ function CurrentPlayer({ state, array }) {
 
     return (
         <div className="ui-status-current-player">
-            <div className="ui-status-cell ui-current">
-                <div
-                    className="ui-current-avatar"
-                    style={{ background: material }}></div>
-                <div className="ui-current-player">{alias}</div>
+            <div className="ui-current">
+                <div className="ui-player-label">
+                    <div
+                        className="ui-current-avatar"
+                        style={{ background: material }}></div>
+                    <div className="ui-current-player">{alias}</div>
+                </div>
             </div>
             <div className="ui-status-icons">
                 <div className="ui-status-cell">

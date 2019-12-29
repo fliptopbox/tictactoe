@@ -170,20 +170,6 @@ class Scene extends React.Component {
         return score;
     }
 
-    gameOver = () => {
-        const rank = this.state.players.sort(
-            (a, b) => b.accumulated - a.accumulated
-        );
-
-        // is this s tied games?
-        const topscore = rank[0].accumulated;
-        const count = rank.filter(p => p.accumulated === topscore).length;
-
-        console.log('winners', topscore, count);
-
-        return { count, rank };
-    };
-
     occupy = (id, emulate = null) => {
         const {
             player,
@@ -266,19 +252,15 @@ class Scene extends React.Component {
 
     saveSettings = settings => {
         const { radius, players } = settings;
-
-        this.setState({
+        const next = {
+            ...this.state,
             radius,
             players,
+            finished: false,
             inProgress: true
-        });
-        // warning setState is VERY slow...
-        // the new state.players is not set fast enough
-        // for the game start ??????
+        };
 
-        console.log(settings);
-
-        this.saveAndStart(players, radius);
+        this.setState(next, () => this.saveAndStart(players, radius));
     };
 
     updateEarth = radius => {
@@ -291,16 +273,14 @@ class Scene extends React.Component {
     render() {
         const opts = {};
         const { earth, state } = this;
-        const { finished } = this.state;
-        const gameover = !finished ? null : this.gameOver();
 
         return (
             <div className="ui-container">
                 <div className="ui-branding">FLIPTOPBOX</div>
                 <Status
                     state={state}
-                    gameover={gameover}
                     earth={earth}
+                    handleRestart={this.restart.bind(this)}
                 />
                 <Settings
                     state={state}
@@ -312,23 +292,46 @@ class Scene extends React.Component {
         );
     }
 
-    saveAndStart(players, radius) {
+    restart() {
+        console.log('Restart');
+        let { players, radius } = this.state;
+
+        // reset the accumulated score and twist
+        players = players.map(p => {
+            p.twist = 0;
+            p.accumulated = 0;
+            return p;
+        });
+
+        // re-generate the earth
+        this.updateEarth(radius);
+
         this.setState({
+            showSettings: true,
+            showIntro: false,
+            inProgress: false,
+            finished: false,
+            players
+        });
+    }
+
+    saveAndStart(players, radius) {
+        const next = {
+            ...this.setState,
             showSettings: false,
             showIntro: false,
             inProgress: true,
             radius,
             players
+        };
+        this.setState(next, () => {
+            window.camera.start(1200);
+            const humans = players.reduce(
+                (a, c) => a + (c.spiecies === 0 ? 1 : 0),
+                0
+            );
+            if (!humans) this.executeNonHumanPlayer(0);
         });
-
-        window.camera.start(1200);
-
-        const humans = players.reduce(
-            (a, c) => a + (c.spiecies === 0 ? 1 : 0),
-            0
-        );
-
-        if (!humans) this.executeNonHumanPlayer(0);
     }
 }
 

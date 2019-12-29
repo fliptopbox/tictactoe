@@ -132,8 +132,8 @@ class Settings extends React.Component {
                         handler={this.handleNons}
                     />
                     <div className="ui-players">{playerslist}</div>
-                    <div className="ui-cta-save" onClick={this.handleSave}>
-                        SAVE
+                    <div className="ui-cta-primary" onClick={this.handleSave}>
+                        PLAY
                     </div>
                 </div>
             </div>

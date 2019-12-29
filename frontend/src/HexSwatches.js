@@ -2,8 +2,7 @@ import React from 'react';
 
 export default HexSwatches;
 
-function HexSwatches({ state, earth }) {
-    console.log("hex swatch", state, earth);
+function HexSwatches({ earth }) {
     if (!earth) return null;
     const hexes = earth
         .filter(c => c.type)
