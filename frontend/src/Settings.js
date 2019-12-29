@@ -1,6 +1,6 @@
 import * as React from 'react';
 import uuid from './uuid';
-import badguys from './bad-guys';
+import antagonist from './bad-guys';
 import { rnd } from './utilities';
 
 const materialKeys = ['black', 'white', 'red', 'grey'];
@@ -188,7 +188,6 @@ function PlayerName({ alias, spiecies, material, handler }) {
 let serialno = 0;
 function getNextMaterial() {
     let n = materialKeys.length;
-    // let color = materialKeys.splice(0, 1);
     let color = materialKeys[serialno % n];
     serialno += 1;
     return color;
@@ -200,7 +199,8 @@ function createPlayer(alias, human) {
     const spiecies = human ? 0 : 1;
 
     // splice to ensure names are unique.
-    alias = alias || badguys.splice(rnd(badguys.length - 1, 0, false),1);
+    const n = antagonist.length - 1;
+    alias = alias || antagonist.splice(rnd(n, 0, false) ,1);
 
     return {
         material,
