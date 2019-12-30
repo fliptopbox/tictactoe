@@ -1,9 +1,5 @@
 import * as React from 'react';
-import uuid from './uuid';
-import antagonist from './bad-guys';
-import { rnd } from './utilities';
-
-const materialKeys = ['black', 'white', 'red', 'grey'];
+import createPlayer from './createPlayer';
 
 class Settings extends React.Component {
     constructor({ state, saveSettings }) {
@@ -189,28 +185,3 @@ function PlayerName({ alias, spiecies, material, handler }) {
     );
 }
 
-let serialno = 0;
-function getNextMaterial() {
-    let n = materialKeys.length;
-    let color = materialKeys[serialno % n];
-    serialno += 1;
-    return color;
-}
-
-function createPlayer(alias, human) {
-    const playerId = uuid('p');
-    const material = getNextMaterial();
-    const spiecies = human ? 0 : 1;
-
-    // splice to ensure names are unique.
-    const n = antagonist.length - 1;
-    alias = alias || antagonist.splice(rnd(n, 0, false), 1);
-
-    return {
-        material,
-        playerId,
-        twist: 0,
-        alias,
-        spiecies
-    };
-}

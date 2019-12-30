@@ -12,7 +12,7 @@
 */
 
 import { ADD_PLAYER, GAME_START, GAME_PLAY, OCCUPY, TWIST } from "./actions";
-import uuid from "./uuid";
+import { uuid } from "./utilities";
 
 function now() {
   return new Date().valueOf();

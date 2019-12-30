@@ -25,6 +25,22 @@ function timeline(duration, fn, frameRate = 60) {
     }
 }
 
+
+let uidserial = 0;
+export { uuid };
+function uuid(ns = "x") {
+  // temporary generator
+  const int = (Math.random() * 36) >> 0;
+  uidserial += 1;
+  return [
+    ns, //
+    //( serial % 36 ).toString(36),
+    ( uidserial % 36 ).toString(36),
+    int.toString(36),
+    Number(new Date().valueOf()).toString(36),
+  ].join("");
+}
+
 const easingCurves = {
     ease: [0.25, 0.1, 0.25, 1],
     linear: [0, 0, 1, 1],
