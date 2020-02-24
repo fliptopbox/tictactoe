@@ -1,5 +1,9 @@
 import * as React from 'react';
-import createPlayer from './createPlayer';
+// import createPlayer from './createPlayer';
+import Range from './Range';
+import Opponents from './Opponents';
+import playerAvatars from './playerAvatars';
+import logo from "./logo";
 
 class Settings extends React.Component {
     constructor({ state, saveSettings }) {
@@ -15,15 +19,12 @@ class Settings extends React.Component {
             players: null
         };
 
+
+        const {opponents, nonhuman} = this.state;
+        this.state.players = playerAvatars(opponents, nonhuman);
         this.state.max = this.state.opponents;
-        this.state.players = [0, 1, 2, 3].map(n => {
-            let ishuman =
-                this.state.opponents > this.state.nonhuman &&
-                this.state.opponents - this.state.nonhuman - n > 0
-                    ? 0
-                    : 1;
-            return createPlayer(null, ishuman === 0);
-        });
+
+        this.playerAvatars = playerAvatars;
     }
 
     handleSave = () => {
@@ -35,36 +36,10 @@ class Settings extends React.Component {
         this.props.saveSettings(settings);
     };
 
-    handleNons = e => {
-        let value = Number(e.target.value);
-        let { max } = this.state;
-        value = Math.min(value, max);
 
-        // update player spiecies
-        let { players, opponents } = this.state;
-        players = players.map((p, i) => {
-            let ishuman =
-                opponents > value && opponents - value - i > 0 ? 0 : 1;
-
-            p.spiecies = ishuman;
-            return p;
-        });
-
-        this.setState({ nonhuman: value, players });
-    };
-    handleRadius = e => {
-        const radius = Number(e.target.value);
-        this.setState({ radius });
-    };
-    handleRadiusChange = e => {
-        const radius = Number(e.target.value);
+    handleRadiusChange = radius => {
+        console.log(radius);
         this.props.updateEarth(radius);
-    };
-    handlePlayers = e => {
-        let { nonhuman } = this.state;
-        const opponents = Number(e.target.value);
-        if (nonhuman > opponents) nonhuman = opponents;
-        this.setState({ opponents, max: opponents, nonhuman });
     };
 
     updatePlayername = (index, text) => {
@@ -74,60 +49,38 @@ class Settings extends React.Component {
         this.setState({ players });
     };
 
+    updateOpponents = object => {
+        const opponents = object.players.value;
+        const nonhuman = object.robots.value;
+        const players = playerAvatars(opponents, nonhuman);
+        console.log('update opponents', object, opponents, nonhuman);
+        this.setState({ opponents, nonhuman, players });
+    };
+
     render() {
         if (!this.props.state.showSettings) return null;
 
-        const { radius } = this.state;
-        const text = `${radius + 2}x${radius + 2}`;
-        const playerslist = this.state.players.map((user, i) => {
-            let { opponents } = this.state;
-            let { alias, playerId, spiecies, material } = user;
+        const { radius, players } = this.state;
+        const avatars = players.map(o => o.el);
 
-            if (i + 1 > opponents) return null;
-
-            return (
-                <PlayerName
-                    key={i}
-                    playerId={playerId}
-                    material={material}
-                    handler={text => this.updatePlayername(i, text)}
-                    alias={alias}
-                    spiecies={spiecies}
-                />
-            );
-        }, this);
 
         return (
             <div className="ui">
                 <div className="ui-settings">
-                    <h2>Game settings</h2>
+                    {logo("settings")}
                     <Range
                         key="radius"
-                        min="1"
-                        max="4"
+                        min={1}
+                        max={4}
+                        value={radius}
                         label="Matrix size"
-                        value={this.state.radius}
-                        text={text}
-                        handler={this.handleRadius}
-                        handleChange={this.handleRadiusChange}
+                        format={v => (v+2) + 'x' + (v+2)}
+                        notify={this.handleRadiusChange}
                     />
-                    <Range
-                        key="opponents"
-                        min="2"
-                        max="4"
-                        label="Opponents"
-                        value={this.state.opponents}
-                        handler={this.handlePlayers}
-                    />
-                    <Range
-                        key="nonhuman"
-                        min="0"
-                        max={this.state.max}
-                        label="Non-human"
-                        value={this.state.nonhuman}
-                        handler={this.handleNons}
-                    />
-                    <div className="ui-players">{playerslist}</div>
+                    <Opponents 
+                        notify={this.updateOpponents} />
+
+                    <div className="avatars">{avatars}</div>
                     <div className="ui-cta-primary" onClick={this.handleSave}>
                         PLAY
                     </div>
@@ -137,51 +90,4 @@ class Settings extends React.Component {
     }
 }
 export default Settings;
-
-function Range({
-    value,
-    text = null,
-    label = null,
-    min,
-    max,
-    handler,
-    handleChange
-}) {
-    handleChange = handleChange || function() {};
-    return (
-        <div className="ui-settings-range">
-            <div className="ui-input-row">
-                <span className="ui-input-label"> {label || ''}</span>
-                <span className="ui-input-text"> {text || value}</span>
-            </div>
-            <input
-                className="ui-input-range"
-                type="range"
-                min={min}
-                max={max}
-                defaultValue={value}
-                onInput={handler}
-                onChange={handleChange}
-            />
-        </div>
-    );
-}
-
-function PlayerName({ alias, spiecies, material, handler }) {
-    spiecies = spiecies === 0 ? 'human' : 'random';
-    const css = { background: material };
-    return (
-        <span className="ui-player-card" style={css}>
-            <div className="ui-player-name">
-                <textarea
-                    placeholder="Your player name"
-                    type="text"
-                    value={alias}
-                    onChange={e => handler(e.target.value)}
-                />
-            </div>
-            <div className="ui-player-spiecies">{spiecies}</div>
-        </span>
-    );
-}
 

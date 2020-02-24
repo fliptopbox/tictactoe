@@ -1,0 +1,61 @@
+.avatars {
+  margin: 3em 0;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.avatar-player {
+  display: flex;
+  flex-direction: column;
+  margin: 0 0.3em;
+}
+
+$size: 6.8em;
+.avatar-icon {
+  margin: 0 auto;
+  width: $size;
+  height: $size;
+  display: block;
+  transform: rotate(0deg);
+  transform-origin: 50% 50%;
+}
+
+.avatar-label {
+  margin: 1em auto;
+  display: block;
+  font-size: 1em;
+  padding: 0 2em;
+  text-align: center;
+  color: white;
+}
+
+.avatar-human {
+  border-radius: 10em;
+  transform: rotate(90deg);
+  opacity: 1;
+  transition: border-radius 950ms, transform 350ms;
+}
+
+.avatar-robot {
+  border-radius: 0.5em;
+  transform: rotate(0deg);
+  opacity: 1;
+  transition: border-radius 350ms, transform 950ms;
+}
+
+.avatar-zero {
+  background: black;
+  color: white;
+}
+.avatar-one {
+  background: white;
+  color: black;
+}
+.avatar-two {
+  background: red;
+  color: white;
+}
+.avatar-three {
+  background: gray;
+  color: white;
+}

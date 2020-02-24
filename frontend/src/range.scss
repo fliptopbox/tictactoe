@@ -1,0 +1,125 @@
+.range {
+    --bg: #1f1f1f;
+    --track: #444444;
+    --dot: #0505ec;
+    --width: 2em;
+    --radius: 10em;
+    --margin: 0.65em;
+
+    background: var(--bg);
+    color: white;
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    margin: 0.5em;
+    border-radius: var(--radius);
+    padding: var(--margin) 0;
+    font-family: Roboto, sans-serif;
+    font-size: 14px;
+
+    em {
+        font-style: normal;
+    }
+    &-slider {
+        position: relative;
+        flex: 1 0 auto;
+        padding: 1em 0;
+        input {
+            width: 100%;
+            padding: 0;
+            margin: 0;
+            display: block;
+            position: relative;
+            z-index: 2;
+        }
+    }
+    // &-value {
+    //     display: block;
+    //     flex: 0 1 auto;
+    //     text-align: center;
+    // }
+    &-track {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        background: var(--track);
+        width: var(--percent);
+        padding: 0 10px 0;
+        border-radius: 0 var(--radius) var(--radius) 0;
+        z-index: 1;
+        &::before {
+            content: '';
+            position: absolute;
+            right: 0;
+            width: var(--width);
+            background: var(--dot);
+            margin: 0.25em;
+            border-radius: var(--radius);
+            border: 0.55em solid black;
+            box-sizing: border-box;
+            top: 0;
+            bottom: 0;
+        }
+    }
+    &-label,
+    &-value {
+        position: relative;
+        padding: 0.7em;
+        display: block;
+        flex: 0 1 auto;
+        text-align: center;
+        margin: 0;
+        min-width: 1.2em;
+    }
+
+    &-value {
+        width: 4em;
+        em {
+            font-weight: 900;
+        }
+    }
+
+    &-label {
+        margin-left: var(--margin);
+        background: var(--track);
+        border-radius: var(--radius) 0 0 var(--radius);
+        em {
+            min-width: 8em;
+            display: block;
+            text-align: left;
+            padding-left: 1em;
+            font-weight: 700;
+        }
+    }
+}
+
+input[type='range'] {
+    & {
+        -webkit-appearance: none;
+    }
+
+    &::-webkit-slider-runnable-track {
+        height: 0px;
+        border: none;
+    }
+
+    &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        border: none;
+        height: 3em;
+        width: 10%;
+        background: #ff000000;
+        cursor: pointer;
+        margin: -1.5em -2em 0 -1em;
+    }
+
+    &:focus {
+        outline: none;
+
+        &::-webkit-slider-runnable-track {
+            background: #ccc;
+        }
+    }
+}

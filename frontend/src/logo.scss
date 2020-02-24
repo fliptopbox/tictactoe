@@ -1,0 +1,37 @@
+.logo {
+
+    font-size: 14px;
+    font-family: Roboto, sans-serif;
+    background: #E90505;
+    padding: 5% 5%;
+    margin: 0 auto 3em;
+
+    &-footer {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    &-brand,
+    &-description,
+    &-subheading {
+        padding: 0;
+        margin: 0;
+        display: block;
+        color: black;
+        font-weight: normal;
+        font-size: 1.4em;
+    }
+
+    &-subheading {
+        opacity: 0.4;
+        text-align: right;
+    }
+
+    &-brand {
+        color: white;
+        font-size: 114px;
+        font-weight: 900;
+        line-height: 1;
+    }
+
+}

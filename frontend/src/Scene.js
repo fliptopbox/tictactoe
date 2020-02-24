@@ -21,7 +21,7 @@ import Player from './Player';
 import Settings from './Settings';
 import Status from './Status';
 
-import './ui.css';
+import './ui.scss';
 
 class Scene extends React.Component {
     constructor() {
